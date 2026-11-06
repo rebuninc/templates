@@ -1,7 +1,7 @@
 {
   "name": "Guestbook",
   "description": "Mural de recados público.",
-  "frameworks": ["next", "tanstack-start"],
+  "frameworks": ["tanstack-start"],
   "env": ["REBUN_API_KEY"],
   "tables": [
     {

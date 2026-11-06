@@ -57,7 +57,6 @@ test("fields have the same attributes", async ({ page }) => {
 test("shows the load error", async ({ page }) => {
   await setMock({ fail: "BOOM" })
   await open(page)
-  // Scoped to main: Next adds its own route announcer with role="alert".
   await expect(page.locator("main").getByRole("alert")).toHaveText(
     "Erro ao carregar: BOOM",
   )

@@ -4,7 +4,7 @@ Every framework folder of a template is the same app written in another framewor
 
 ## Must be identical
 
-1. **`lib/rebun.ts` is byte-identical** across frameworks (`next/lib/rebun.ts`, `tanstack-start/src/lib/rebun.ts`, ...). Copy it, never edit just one.
+1. **`lib/rebun.ts` is byte-identical** across frameworks (`tanstack-start/src/lib/rebun.ts`, ...). Copy it, never edit just one.
 2. **Data access:** same tables, same SDK calls, same filters, order and limits (e.g. `take(50)` everywhere).
 3. **Input handling:** same fields, same normalization (`trim`, `String(...)`), same validation and same early returns.
 4. **Error handling:** same cases, same thrown/displayed message (e.g. `` `${error.status} ${error.code}` ``, `Erro ao carregar: {code}`).
@@ -13,9 +13,9 @@ Every framework folder of a template is the same app written in another framewor
 
 ## May differ (framework glue only)
 
-1. How the server runs: Server Components/Actions (Next) vs `createServerFn` + loaders (TanStack Start).
-2. How data is refreshed: `revalidatePath` vs `router.invalidate()`.
-3. File layout, routing files, config files (`next.config.ts`, `vite.config.ts`) and framework-specific options (`export const dynamic`).
+1. How the server runs (e.g. `createServerFn` + loaders in TanStack Start).
+2. How data is refreshed (e.g. `router.invalidate()`).
+3. File layout, routing files, config files (e.g. `vite.config.ts`) and framework-specific options.
 
 If a difference is forced by the framework and is visible to the user, record it in the spec and keep it as small as possible.
 
@@ -23,7 +23,7 @@ If a difference is forced by the framework and is visible to the user, record it
 
 1. **A change to a template is applied to every folder listed in `frameworks` of its `rebun.json`, in the same change.** Never leave a framework for later.
 2. **Specs describe behavior once, for all frameworks**, and list the files changed in each framework.
-3. **Before finishing, compare the frameworks side by side** (e.g. `diff next/lib/rebun.ts tanstack-start/src/lib/rebun.ts` and reading the equivalent route/page files) and check every item in "Must be identical".
+3. **Before finishing, compare the frameworks side by side** (e.g. `diff <a>/lib/rebun.ts tanstack-start/src/lib/rebun.ts` and reading the equivalent route/page files) and check every item in "Must be identical".
 4. **Adding a new framework** means porting the whole current behavior of the template — no partial ports.
 
 ## E2E parity tests

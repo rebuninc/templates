@@ -5,11 +5,10 @@ Apps prontos para deploy na Vercel, integrados ao [`rebun-sdk`](https://www.npmj
 ```
 apps/<template>/
   rebun.json          # manifesto: nome, frameworks, env e tabelas (compartilhado)
-  next/               # app Next.js autossuficiente
   tanstack-start/     # app TanStack Start autossuficiente
 ```
 
-Frameworks: `next`, `tanstack-start`.
+Frameworks: `tanstack-start`.
 
 ## Regras
 
@@ -33,13 +32,12 @@ A Vercel não aceita valor pré-preenchido para env; o usuário cola a key mostr
 
 ## Dev
 
-Todos os apps leem o `.env` da raiz (`process.loadEnvFile` no `next.config.ts` / `vite.config.ts`). No clone da Vercel o arquivo não existe e valem as envs do projeto.
+Todos os apps leem o `.env` da raiz (`process.loadEnvFile` no `vite.config.ts`). No clone da Vercel o arquivo não existe e valem as envs do projeto.
 
 ```sh
 bun install
 cp .env.example .env
-bun --filter guestbook-next dev            # :3000
-bun --filter guestbook-tanstack-start dev  # :3001
+bun --filter guestbook-tanstack-start dev
 ```
 
 Novo template: copie `apps/guestbook`, troque `name` em cada `package.json` e o `rebun.json`.
