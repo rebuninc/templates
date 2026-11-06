@@ -10,7 +10,7 @@ apps/<template>/
 ```
 
 1. **Each framework folder is self-contained.** Vercel clones only `apps/<template>/<framework>` into a new repo: no `extends` to the root, no `workspace:*`, no imports outside the folder.
-2. **Same behavior across frameworks.** Same screens, same tables, same `Schema` in `lib/rebun.ts`. A change in one framework lands in all of them in the same change.
+2. **Same behavior across frameworks.** See `rules/parity.md`.
 3. **The API key stays on the server** (`REBUN_API_KEY`, no public prefix). The SDK runs only in Server Components/Actions (Next) and `createServerFn` (TanStack Start).
 4. **`rebun.json` is the source of the tables.** `columns` follows the body of `POST /projects/:id/tables/:name/columns`, `access` the body of `PUT .../access`. `id`, `created_at`, `updated_at` and `owner_id` are automatic, never declare them. `frameworks` lists exactly the folders that exist.
 5. **Package name is `<template>-<framework>`** (e.g. `guestbook-next`).

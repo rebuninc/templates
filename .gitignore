@@ -9,3 +9,5 @@ next-env.d.ts
 .output
 .nitro
 .tanstack
+test-results
+playwright-report
