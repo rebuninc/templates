@@ -10,7 +10,7 @@ try {
 } catch {}
 
 export default defineConfig({
-  server: { port: 3002 },
+  server: { port: 4000 },
   resolve: { tsconfigPaths: true },
   plugins: [tailwindcss(), tanstackStart(), nitro(), viteReact()],
 })

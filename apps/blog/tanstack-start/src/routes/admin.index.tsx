@@ -1,44 +1,30 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
+import { Pagination } from "@/components/pagination"
 import { PostList } from "@/components/post-list"
-import { deletePost, listMine, signOut } from "@/lib/posts"
+import { deletePost, listMine, parsePage } from "@/lib/posts"
 
 export const Route = createFileRoute("/admin/")({
-  loader: () => listMine(),
+  validateSearch: (search: Record<string, unknown>): { page?: number } => {
+    const page = parsePage(search.page)
+    return page > 1 ? { page } : {}
+  },
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
+  loader: ({ deps }) => listMine({ data: deps.page }),
   component: Admin,
 })
 
 function Admin() {
-  const { email, posts, error } = Route.useLoaderData()
+  const { posts, pages, error } = Route.useLoaderData()
+  const { page = 1 } = Route.useSearch()
   const router = useRouter()
   const [failed, setFailed] = useState<string | null>(null)
 
   return (
-    <main className="mx-auto grid max-w-2xl gap-8 px-4 py-16">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">Meus posts</h1>
-          <p className="text-sm text-neutral-400">{email}</p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            to="/admin/new"
-            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950"
-          >
-            Novo post
-          </Link>
-          <button
-            type="button"
-            className="rounded-full border border-white/15 px-4 py-2 text-sm"
-            onClick={async () => {
-              await signOut()
-              await router.navigate({ to: "/login" })
-            }}
-          >
-            Sair
-          </button>
-        </div>
-      </header>
+    <main className="mx-auto grid max-w-7xl gap-14 px-5 py-16 md:px-10 md:py-20">
+      <h1 className="text-5xl leading-none font-[510] tracking-[-0.022em]">
+        Meus posts
+      </h1>
       {error || failed ? (
         <p role="alert" className="text-red-400">
           {error ? `Erro ao carregar: ${error}` : failed}
@@ -47,17 +33,17 @@ function Admin() {
       <PostList
         posts={posts}
         actions={(post) => (
-          <div className="flex gap-2 text-sm">
+          <div className="flex gap-1.5 text-xs font-[510]">
             <Link
               to="/admin/$postId/edit"
               params={{ postId: post.id }}
-              className="rounded-full border border-white/15 px-4 py-1.5"
+              className="rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 backdrop-blur-md hover:bg-bg"
             >
               Editar
             </Link>
             <button
               type="button"
-              className="rounded-full border border-red-400/40 px-4 py-1.5 text-red-300"
+              className="rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 text-red-400 backdrop-blur-md hover:bg-bg"
               onClick={async () => {
                 if (!window.confirm(`Excluir "${post.title}"?`)) return
                 setFailed(null)
@@ -74,6 +60,7 @@ function Admin() {
           </div>
         )}
       />
+      <Pagination page={page} pages={pages} />
     </main>
   )
 }

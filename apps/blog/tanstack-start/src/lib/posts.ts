@@ -51,16 +51,40 @@ export const getViewer = createServerFn().handler(async () => {
   return user ? { id: user.id, email: user.email } : null
 })
 
-export const listPublished = createServerFn().handler(async () => {
-  const client = rebun()
-  const { data, error } = await client.db
+export const PAGE_SIZE = 12
+
+// Pages are 1-based and come from the URL, so anything odd falls back to 1.
+export const parsePage = (raw: unknown) => {
+  const page = Number(raw)
+  return Number.isInteger(page) && page > 1 ? page : 1
+}
+
+async function listPage(
+  client: ReturnType<typeof rebun>,
+  column: "published" | "owner_id",
+  value: string,
+  page: number,
+) {
+  const { data, error, total } = await client.db
     .from("posts")
-    .where("published", "==", "true")
-    .take(50)
-  if (error) return { posts: [], error: error.code }
+    .where(column, "==", value)
+    .skip((page - 1) * PAGE_SIZE)
+    .take(PAGE_SIZE)
+  if (error) return { posts: [], pages: 1, error: error.code }
   const posts = await Promise.all(data.map((post) => withImage(client, post)))
-  return { posts, error: null }
-})
+  return {
+    posts,
+    pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+    error: null,
+  }
+}
+
+export const listPublished = createServerFn()
+  .validator(parsePage)
+  .handler(async ({ data: page }) => {
+    const client = rebun()
+    return listPage(client, "published", "true", page)
+  })
 
 export const getPostBySlug = createServerFn()
   .validator((slug: string) => slug)
@@ -79,17 +103,13 @@ export const getPostBySlug = createServerFn()
     return withImage(client, post)
   })
 
-export const listMine = createServerFn().handler(async () => {
-  const client = rebun()
-  const user = await requireViewer(client)
-  const { data, error } = await client.db
-    .from("posts")
-    .where("owner_id", "==", user.id)
-    .take(50)
-  if (error) return { email: user.email, posts: [], error: error.code }
-  const posts = await Promise.all(data.map((post) => withImage(client, post)))
-  return { email: user.email, posts, error: null }
-})
+export const listMine = createServerFn()
+  .validator(parsePage)
+  .handler(async ({ data: page }) => {
+    const client = rebun()
+    const user = await requireViewer(client)
+    return listPage(client, "owner_id", user.id, page)
+  })
 
 export const getMine = createServerFn()
   .validator((id: string) => id)
@@ -183,16 +203,34 @@ export const verifyCode = createServerFn({ method: "POST" })
     return { error: error?.code ?? null }
   })
 
-export const startGoogle = createServerFn({ method: "POST" }).handler(
-  async () => {
-    const { data, error } = await rebun().auth.signIn("google", {
+export const getProviders = createServerFn().handler(async () => {
+  const { data, error } = await rebun().project.me()
+  return { providers: data?.providers ?? [], error: error?.code ?? null }
+})
+
+export const startOAuth = createServerFn({ method: "POST" })
+  .validator((provider: "google" | "github") => provider)
+  .handler(async ({ data: provider }) => {
+    const { data, error } = await rebun().auth.signIn(provider, {
       redirectUri: redirectUri(),
     })
     return error
       ? { url: null, error: error.code }
       : { url: data.url, error: null }
-  },
-)
+  })
+
+export const signInPassword = createServerFn({ method: "POST" })
+  .validator((input: { email: string; password: string }) => ({
+    email: String(input.email).trim(),
+    password: String(input.password),
+  }))
+  .handler(async ({ data }) => {
+    const { error } = await rebun().auth.signIn("password", {
+      ...data,
+      redirectUri: redirectUri(),
+    })
+    return { error: error?.code ?? null }
+  })
 
 export const exchangeCode = createServerFn()
   .validator((code: string) => String(code))

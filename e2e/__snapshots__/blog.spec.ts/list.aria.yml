@@ -1,10 +1,10 @@
 - main:
   - heading "Posts" [level=1]
-  - link "Entrar"
   - list:
     - listitem:
       - heading "Segundo" [level=2]:
         - link "Segundo"
+      - paragraph: Primeira linha de Segundo
       - paragraph:
         - time: 02/01/2026
       - list "Tags":
@@ -13,6 +13,7 @@
     - listitem:
       - heading "Primeiro" [level=2]:
         - link "Primeiro"
+      - paragraph: Primeira linha de Primeiro
       - paragraph:
         - time: 01/01/2026
       - list "Tags":

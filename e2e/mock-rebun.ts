@@ -5,6 +5,8 @@ type State = {
   tables: Record<string, Row[]>
   users: User[]
   fail: string | null
+  providers: string[]
+  projectFail: string | null
   posts: { table: string; values: Row }[]
   patches: { table: string; id: string; values: Row }[]
   deletes: { table: string; id: string }[]
@@ -16,6 +18,8 @@ const empty = (): State => ({
   tables: {},
   users: [],
   fail: null,
+  providers: ["google", "github", "otp", "password"],
+  projectFail: null,
   posts: [],
   patches: [],
   deletes: [],
@@ -24,8 +28,9 @@ const empty = (): State => ({
 })
 let state = empty()
 
-// The only OTP code the mock accepts; auth codes and tokens just carry the user id.
+// The only OTP code and password the mock accepts; auth codes and tokens just carry the user id.
 const OTP = "123456"
+const PASSWORD = "senha123"
 
 const port = Number(process.argv[2])
 const origin = `http://localhost:${port}`
@@ -56,12 +61,20 @@ const authCode = (user: User) => `code-${user.id}`
 
 function handleAuth(req: Request, pathname: string) {
   if (pathname === "/v1/auth/otp/start") return Response.json(null)
-  if (pathname === "/v1/auth/google/start")
+  const oauth = pathname.match(/^\/v1\/auth\/(google|github)\/start$/)
+  if (oauth)
     return json(req).then((body) =>
       Response.json({
-        url: `${origin}/__google?${new URLSearchParams({ redirect: String(body.redirectUri) })}`,
+        url: `${origin}/__oauth?${new URLSearchParams({ redirect: String(body.redirectUri) })}`,
       }),
     )
+  if (pathname === "/v1/auth/password/sign-in")
+    return json(req).then((body) => {
+      const user = state.users.find((u) => u.email === body.email)
+      if (!user || body.password !== PASSWORD)
+        return Response.json({ error: "INVALID_CREDENTIALS" }, { status: 401 })
+      return Response.json({ code: authCode(user) })
+    })
   if (pathname === "/v1/auth/otp/verify")
     return json(req).then((body) => {
       const user = state.users.find((u) => u.email === body.email)
@@ -177,7 +190,12 @@ Bun.serve({
       state = { ...empty(), ...next }
       return new Response(null, { status: 204 })
     }
-    if (pathname === "/__google") {
+    if (pathname === "/v1/project/me") {
+      if (state.projectFail)
+        return Response.json({ error: state.projectFail }, { status: 500 })
+      return Response.json({ providers: state.providers })
+    }
+    if (pathname === "/__oauth") {
       const user = state.users[0]
       const target = new URL(url.searchParams.get("redirect") ?? "")
       target.searchParams.set("code", user ? authCode(user) : "none")

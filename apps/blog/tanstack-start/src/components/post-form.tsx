@@ -4,7 +4,7 @@ import { savePost } from "@/lib/posts"
 import type { Post } from "@/lib/rebun"
 
 const field =
-  "rounded-2xl border border-white/15 bg-white/5 px-4 py-3 outline-none focus:border-white/40"
+  "rounded-lg border border-line bg-surface px-3.5 py-2.5 text-fg outline-none placeholder:text-muted focus:border-muted file:mr-3 file:rounded-full file:border-0 file:bg-fg file:px-3 file:py-1 file:text-sm file:text-bg"
 
 export function PostForm({ post }: { post?: Post }) {
   const router = useRouter()
@@ -13,7 +13,7 @@ export function PostForm({ post }: { post?: Post }) {
 
   return (
     <form
-      className="grid gap-4"
+      className="grid gap-5"
       onSubmit={async (e) => {
         e.preventDefault()
         setBusy(true)
@@ -29,7 +29,7 @@ export function PostForm({ post }: { post?: Post }) {
       }}
     >
       {post ? <input type="hidden" name="id" value={post.id} /> : null}
-      <label className="grid gap-2">
+      <label className="grid gap-2 text-sm font-[510]">
         Título
         <input
           name="title"
@@ -39,7 +39,7 @@ export function PostForm({ post }: { post?: Post }) {
           className={field}
         />
       </label>
-      <label className="grid gap-2">
+      <label className="grid gap-2 text-sm font-[510]">
         Conteúdo
         <textarea
           name="content"
@@ -49,7 +49,7 @@ export function PostForm({ post }: { post?: Post }) {
           className={field}
         />
       </label>
-      <label className="grid gap-2">
+      <label className="grid gap-2 text-sm font-[510]">
         Tags
         <input
           name="tags"
@@ -58,16 +58,16 @@ export function PostForm({ post }: { post?: Post }) {
           className={field}
         />
       </label>
-      <label className="grid gap-2">
+      <label className="grid gap-2 text-sm font-[510]">
         Imagem
         <input name="image" type="file" accept="image/*" className={field} />
       </label>
-      <label className="flex items-center gap-3">
+      <label className="flex items-center gap-3 text-sm font-[510]">
         <input
           name="published"
           type="checkbox"
           defaultChecked={post?.published === "true"}
-          className="size-5 accent-white"
+          className="size-4 accent-fg"
         />
         Publicado
       </label>
@@ -79,7 +79,7 @@ export function PostForm({ post }: { post?: Post }) {
       <button
         type="submit"
         disabled={busy}
-        className="h-12 rounded-full bg-white px-5 font-medium text-neutral-950 disabled:opacity-50"
+        className="h-10 justify-self-start rounded-full bg-fg px-5 text-sm font-[510] text-bg disabled:opacity-50"
       >
         Salvar
       </button>

@@ -2,6 +2,8 @@
 
 ## Relacionadas
 - Altera: [001 — ui-parity-e2e](./001-ui-parity-e2e.md) — remove o template guestbook (os testes cobrem só o blog) e o `rebun.json` (frameworks pelas pastas)
+- Alterada por: [003 — blog-linear-ui](./003-blog-linear-ui.md) — UI no estilo Linear Now, sem React Bits
+- Alterada por: [004 — blog-login-split](./004-blog-login-split.md) — e-mail atrás do botão "Continuar com e-mail"
 
 ## Objetivo
 Novo template `apps/blog` (só TanStack Start por enquanto): blog público com lista e detalhe de posts publicados, login por OTP ou Google (sem cadastro) e CRUD dos próprios posts para quem está logado.
@@ -53,6 +55,7 @@ Novo template `apps/blog` (só TanStack Start por enquanto): blog público com l
 - Erro ao salvar ou excluir → mensagem `{status} {code}` no form/lista, nada muda.
 - Cookie expirado em `/admin` → vai para `/login`.
 - Navegador sem WebGL → a Aurora não renderiza e a página funciona igual.
+- Remontagem do componente (StrictMode, HMR) → a Aurora volta a renderizar; o cleanup não perde o contexto WebGL do canvas.
 - `prefers-reduced-motion` → o conteúdo aparece sem esperar a animação (cards e títulos visíveis de cara).
 
 ## Critérios de aceite
@@ -68,3 +71,4 @@ Novo template `apps/blog` (só TanStack Start por enquanto): blog público com l
 - [x] Dado logado, quando clico "Sair", então o cookie é limpo e `/admin` volta a redirecionar para `/login`.
 - [x] Dado o mock falhando a leitura, quando abro `/`, então aparece "Erro ao carregar: BOOM".
 - [x] Dado `/` aberto, então o `<main>` bate com o ARIA snapshot (título "Posts" inteiro como heading, cards dos posts publicados), sem o fundo Aurora na árvore acessível.
+- [x] Dado `/` ou `/login` com WebGL, então a Aurora ocupa a largura toda da janela e o contexto WebGL não está perdido.

@@ -1,52 +1,36 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { AuroraTop } from "@/components/aurora-top"
-import BlurText from "@/components/blur-text"
+import { createFileRoute } from "@tanstack/react-router"
+import { Pagination } from "@/components/pagination"
 import { PostList } from "@/components/post-list"
-import { getViewer, listPublished } from "@/lib/posts"
+import { listPublished, parsePage } from "@/lib/posts"
 
 export const Route = createFileRoute("/")({
-  loader: async () => {
-    const [list, viewer] = await Promise.all([listPublished(), getViewer()])
-    return { ...list, viewer }
+  validateSearch: (search: Record<string, unknown>): { page?: number } => {
+    const page = parsePage(search.page)
+    return page > 1 ? { page } : {}
   },
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
+  loader: ({ deps }) => listPublished({ data: deps.page }),
   component: Home,
 })
 
 function Home() {
-  const { posts, error, viewer } = Route.useLoaderData()
+  const { posts, pages, error } = Route.useLoaderData()
+  const { page = 1 } = Route.useSearch()
 
   return (
-    <main className="relative isolate mx-auto grid max-w-2xl gap-8 px-4 py-16">
-      <AuroraTop />
-      <header className="flex items-center justify-between gap-4">
-        <BlurText
-          as="h1"
-          text="Posts"
-          animateBy="letters"
-          className="text-5xl font-bold tracking-tight"
-        />
-        {viewer ? (
-          <Link
-            to="/admin"
-            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950"
-          >
-            Meus posts
-          </Link>
-        ) : (
-          <Link
-            to="/login"
-            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950"
-          >
-            Entrar
-          </Link>
-        )}
-      </header>
+    <main className="mx-auto grid max-w-7xl gap-14 px-5 py-16 md:px-10 md:py-20">
+      <h1 className="text-5xl leading-none font-[510] tracking-[-0.022em]">
+        Posts
+      </h1>
       {error ? (
         <p role="alert" className="text-red-400">
           Erro ao carregar: {error}
         </p>
       ) : (
-        <PostList posts={posts} />
+        <>
+          <PostList posts={posts} />
+          <Pagination page={page} pages={pages} />
+        </>
       )}
     </main>
   )

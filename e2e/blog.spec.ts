@@ -8,6 +8,13 @@ type State = {
   removedFiles: string[]
 }
 
+// Software WebGL so headless Chromium can create the login shader's context.
+test.use({
+  launchOptions: {
+    args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
+  },
+})
+
 const mockUrl = () => test.info().project.metadata.mockUrl as string
 
 async function setMock(state: Record<string, unknown>) {
@@ -23,14 +30,13 @@ async function mock() {
   return state
 }
 
-// Animations would race the assertions; the spec says reduced motion shows everything at once.
-test.use({ contextOptions: { reducedMotion: "reduce" } })
-
 // Wait for hydration so forms submit through JS, not natively.
 const open = (page: Page, path: string) =>
   page.goto(path, { waitUntil: "networkidle" })
 
 const user = { id: "u1", email: "ana@exemplo.com" }
+
+const toast = (page: Page) => page.locator("[data-sonner-toast]")
 
 const post = (
   id: string,
@@ -66,6 +72,7 @@ test.beforeEach(async () => {
 
 async function login(page: Page) {
   await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com e-mail" }).click()
   await page.getByPlaceholder("E-mail").fill(user.email)
   await page.getByRole("button", { name: "Enviar código" }).click()
   await page.getByPlaceholder("Código").fill("123456")
@@ -116,25 +123,25 @@ test("logs in with the OTP code", async ({ page }) => {
 
 test("shows a wrong OTP code", async ({ page }) => {
   await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com e-mail" }).click()
   await page.getByPlaceholder("E-mail").fill(user.email)
   await page.getByRole("button", { name: "Enviar código" }).click()
   await page.getByPlaceholder("Código").fill("000000")
   await page.getByRole("button", { name: "Entrar", exact: true }).click()
-  await expect(page.getByRole("alert")).toHaveText(
-    "Erro ao entrar: INVALID_CODE",
-  )
+  await expect(toast(page)).toHaveText("Erro ao entrar: INVALID_CODE")
+  await expect(toast(page)).toHaveAttribute("data-y-position", "top")
+  await expect(toast(page)).toHaveAttribute("data-x-position", "center")
   await expect(page.getByPlaceholder("Código")).toBeVisible()
 })
 
 test("refuses an email without an account", async ({ page }) => {
   await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com e-mail" }).click()
   await page.getByPlaceholder("E-mail").fill("nova@exemplo.com")
   await page.getByRole("button", { name: "Enviar código" }).click()
   await page.getByPlaceholder("Código").fill("123456")
   await page.getByRole("button", { name: "Entrar", exact: true }).click()
-  await expect(page.getByRole("alert")).toHaveText(
-    "Erro ao entrar: SIGNUP_NOT_ALLOWED",
-  )
+  await expect(toast(page)).toHaveText("Erro ao entrar: SIGNUP_NOT_ALLOWED")
 })
 
 test("logs in with Google through the callback", async ({ page }) => {
@@ -142,6 +149,64 @@ test("logs in with Google through the callback", async ({ page }) => {
   await page.getByRole("button", { name: "Entrar com Google" }).click()
   await expect(page).toHaveURL(/\/admin$/)
   await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
+})
+
+test("logs in with GitHub through the callback", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Entrar com GitHub" }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
+})
+
+test("logs in with email and password", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com senha" }).click()
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByPlaceholder("Senha").fill("senha123")
+  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
+})
+
+test("shows a wrong password", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com senha" }).click()
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByPlaceholder("Senha").fill("errada")
+  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await expect(toast(page)).toHaveText("Erro ao entrar: INVALID_CREDENTIALS")
+  await expect(page.getByPlaceholder("Senha")).toBeVisible()
+})
+
+test("shows only the active login providers", async ({ page }) => {
+  await setMock({ users: [user], providers: ["otp", "google"] })
+  await open(page, "/login")
+  await expect(
+    page.getByRole("button", { name: "Entrar com Google" }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Continuar com e-mail" }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Entrar com GitHub" }),
+  ).toHaveCount(0)
+  await expect(
+    page.getByRole("button", { name: "Continuar com senha" }),
+  ).toHaveCount(0)
+})
+
+test("says when no login provider is active", async ({ page }) => {
+  await setMock({ users: [user], providers: [] })
+  await open(page, "/login")
+  await expect(page.getByText("Nenhum método de login ativo.")).toBeVisible()
+  await expect(page.locator("main button")).toHaveCount(0)
+})
+
+test("shows a failure to load the providers", async ({ page }) => {
+  await setMock({ users: [user], projectFail: "INTERNAL" })
+  await open(page, "/login")
+  await expect(toast(page)).toHaveText("Erro ao carregar: INTERNAL")
+  await expect(page.locator("main button")).toHaveCount(0)
 })
 
 test("sends visitors from /admin to /login", async ({ page }) => {
@@ -227,8 +292,74 @@ test("deletes a post and its image", async ({ page }) => {
 
 test("signs out", async ({ page }) => {
   await login(page)
+  await page.getByRole("button", { name: "Conta" }).click()
   await page.getByRole("button", { name: "Sair" }).click()
   await expect(page).toHaveURL(/\/login$/)
   await open(page, "/admin")
   await expect(page).toHaveURL(/\/login$/)
+})
+
+test("shows the viewer in the navbar", async ({ page }) => {
+  const nav = page.getByRole("banner").getByRole("link")
+  await open(page, "/")
+  await expect(nav).toHaveText(["Blog", "Entrar"])
+  await login(page)
+  await expect(nav).toHaveText(["Blog", "Meus posts", "Novo post"])
+  await expect(page.getByRole("button", { name: "Conta" })).toHaveText("a")
+  await page.getByRole("button", { name: "Conta" }).click()
+  await expect(page.getByText(user.email)).toBeVisible()
+  await expect(page.getByRole("button", { name: "Sair" })).toBeVisible()
+})
+
+test("keeps covers aligned with and without an image", async ({ page }) => {
+  await open(page, "/")
+  const covers = page.locator("main li > :first-child")
+  const first = await covers.nth(0).boundingBox()
+  const second = await covers.nth(1).boundingBox()
+  expect(Math.abs((first?.height ?? 0) - (second?.height ?? -9))).toBeLessThan(
+    2,
+  )
+})
+
+test("shows the login options and goes back from the email step", async ({
+  page,
+}) => {
+  await open(page, "/login")
+  await expect(page.getByRole("banner")).toBeHidden()
+  await expect(
+    page.getByRole("heading", { name: "Entrar no Blog" }),
+  ).toBeVisible()
+  await expect(page.getByPlaceholder("E-mail")).toHaveCount(0)
+
+  await page.getByRole("button", { name: "Continuar com e-mail" }).click()
+  await expect(page.getByPlaceholder("E-mail")).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Enviar código" }),
+  ).toBeVisible()
+
+  await page.getByRole("button", { name: "Voltar" }).click()
+  await expect(page.getByPlaceholder("E-mail")).toHaveCount(0)
+  await expect(
+    page.getByRole("button", { name: "Continuar com e-mail" }),
+  ).toBeVisible()
+})
+
+test.describe("login shader", () => {
+  test("draws on wide screens and hides on phones", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await open(page, "/login")
+    await expect(
+      page.getByText("Escreva. Publique. Compartilhe."),
+    ).toBeVisible()
+    const lost = await page
+      .locator("canvas")
+      .evaluate(
+        (c: HTMLCanvasElement) =>
+          c.getContext("webgl")?.isContextLost() ?? true,
+      )
+    expect(lost).toBe(false)
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(page.locator("canvas")).toBeHidden()
+  })
 })

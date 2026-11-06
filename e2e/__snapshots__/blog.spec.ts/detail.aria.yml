@@ -1,5 +1,5 @@
 - main:
-  - link "← Posts"
+  - link "Posts"
   - article:
     - heading "Segundo" [level=1]
     - paragraph:

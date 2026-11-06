@@ -20,11 +20,11 @@ function Callback() {
   const { error } = Route.useLoaderData()
 
   return (
-    <main className="mx-auto grid max-w-sm gap-4 px-4 py-24">
+    <main className="mx-auto grid max-w-sm gap-4 px-5 py-24 text-center">
       <p role="alert" className="text-red-400">
         Erro ao entrar: {error}
       </p>
-      <Link to="/login" className="hover:underline">
+      <Link to="/login" className="text-muted hover:text-fg">
         Voltar para o login
       </Link>
     </main>
