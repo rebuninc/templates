@@ -2,6 +2,7 @@
 
 ## Relacionadas
 - Altera: [004 — blog-login-split](./004-blog-login-split.md) — os botões de `/login` passam a depender dos providers ativos e entram GitHub e senha
+- Alterada por: [009 — blog-signup-toggle](./009-blog-signup-toggle.md) — `/login` ganha a pill "Entrar | Criar conta" com `auth:signup`
 
 ## Objetivo
 Atualizar o `rebun-sdk` para 0.5.2 e usar `rebun.project.me()` para mostrar em `/login` só os métodos de login ativos no projeto, adicionando GitHub e e-mail + senha. Os erros do `/login` passam a aparecer num toast (`sonner`) no topo, centralizado.

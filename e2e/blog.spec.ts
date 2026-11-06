@@ -220,6 +220,67 @@ test("shows a failure to load the providers", async ({ page }) => {
   await expect(page.locator("main button")).toHaveCount(0)
 })
 
+const signUpKey = { users: [user], permissions: ["auth:login", "auth:signup"] }
+
+test("hides the sign-up toggle without auth:signup", async ({ page }) => {
+  await open(page, "/login")
+  await expect(page.getByRole("radio", { name: "Criar conta" })).toHaveCount(0)
+})
+
+test("switches the login texts to sign-up", async ({ page }) => {
+  await setMock(signUpKey)
+  await open(page, "/login")
+  await expect(page.getByRole("radio", { name: "Entrar" })).toBeChecked()
+  await page.getByRole("radio", { name: "Criar conta" }).check()
+  await expect(
+    page.getByRole("heading", { name: "Criar conta no Blog" }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Cadastrar com Google" }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Cadastrar com GitHub" }),
+  ).toBeVisible()
+})
+
+test("keeps the sign-up mode after going back", async ({ page }) => {
+  await setMock(signUpKey)
+  await open(page, "/login")
+  await page.getByRole("radio", { name: "Criar conta" }).check()
+  await page.getByRole("button", { name: "Continuar com senha" }).click()
+  await page.getByRole("button", { name: "Voltar" }).click()
+  await expect(page.getByRole("radio", { name: "Criar conta" })).toBeChecked()
+})
+
+test("signs up with email, password and code", async ({ page }) => {
+  await setMock(signUpKey)
+  await open(page, "/login")
+  await page.getByRole("radio", { name: "Criar conta" }).check()
+  await page.getByRole("button", { name: "Continuar com senha" }).click()
+  await page.getByPlaceholder("E-mail").fill(" nova@exemplo.com ")
+  await page.getByPlaceholder("Senha").fill("senha123")
+  await page.getByRole("button", { name: "Criar conta", exact: true }).click()
+  await expect(
+    page.getByText("Enviamos um código para nova@exemplo.com."),
+  ).toBeVisible()
+  await page.getByPlaceholder("Código").fill("123456")
+  await page.getByRole("button", { name: "Criar conta", exact: true }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
+})
+
+test("refuses to sign up an existing email", async ({ page }) => {
+  await setMock(signUpKey)
+  await open(page, "/login")
+  await page.getByRole("radio", { name: "Criar conta" }).check()
+  await page.getByRole("button", { name: "Continuar com senha" }).click()
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByPlaceholder("Senha").fill("senha123")
+  await page.getByRole("button", { name: "Criar conta", exact: true }).click()
+  await expect(toast(page)).toHaveText("Erro ao entrar: USER_ALREADY_EXISTS")
+  await expect(page.getByPlaceholder("Senha")).toBeVisible()
+})
+
 test("sends visitors from /admin to /login", async ({ page }) => {
   await open(page, "/admin")
   await expect(page).toHaveURL(/\/login$/)

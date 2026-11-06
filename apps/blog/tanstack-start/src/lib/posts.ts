@@ -205,7 +205,11 @@ export const verifyCode = createServerFn({ method: "POST" })
 
 export const getProviders = createServerFn().handler(async () => {
   const { data, error } = await rebun().project.me()
-  return { providers: data?.providers ?? [], error: error?.code ?? null }
+  return {
+    providers: data?.providers ?? [],
+    signUp: data?.permissions.includes("auth:signup") ?? false,
+    error: error?.code ?? null,
+  }
 })
 
 export const startOAuth = createServerFn({ method: "POST" })
@@ -229,6 +233,29 @@ export const signInPassword = createServerFn({ method: "POST" })
       ...data,
       redirectUri: redirectUri(),
     })
+    return { error: error?.code ?? null }
+  })
+
+export const signUpPassword = createServerFn({ method: "POST" })
+  .validator((input: { email: string; password: string }) => ({
+    email: String(input.email).trim(),
+    password: String(input.password),
+  }))
+  .handler(async ({ data }) => {
+    const { error } = await rebun().auth.signUp({
+      ...data,
+      redirectUri: redirectUri(),
+    })
+    return { error: error?.code ?? null }
+  })
+
+export const verifySignUp = createServerFn({ method: "POST" })
+  .validator((input: { email: string; code: string }) => ({
+    email: String(input.email).trim(),
+    code: String(input.code).trim(),
+  }))
+  .handler(async ({ data }) => {
+    const { error } = await rebun().auth.verifySignUp(data)
     return { error: error?.code ?? null }
   })
 

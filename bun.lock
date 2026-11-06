@@ -20,7 +20,7 @@
         "motion": "14.9.1",
         "react": "19.3.1",
         "react-dom": "19.3.1",
-        "rebun-sdk": "0.5.2",
+        "rebun-sdk": "0.5.3",
         "sonner": "2.0.8",
       },
       "devDependencies": {
@@ -391,7 +391,7 @@
 
     "readdirp": ["readdirp@5.1.1", "", {}, "sha512-Kko+Y5XQ6fM+Ce3dq3m9YGxnacYZYl9cA1wZjaF3Vbry2L3i1qVg8+CAgNPsXRArPMUMCaOR7oa9Nqntc43JKA=="],
 
-    "rebun-sdk": ["rebun-sdk@0.5.2", "", {}, "sha512-P8p3+DapiRaO2BIWUe/7KHxWTs0ZCz7M3htRXfisdAtzeAg7XLrDAW/heGikFqoiWsuY8tKYJbRHormrE0JMcA=="],
+    "rebun-sdk": ["rebun-sdk@0.5.3", "", {}, "sha512-gJtVDAnBTuEn++WC6fTZXZ2o/lg7uzU2bBXsdVIrRzDI/bKidhZUDrgWtSeQWHdbP2pAEtb2Kc0zfFVesNyxKw=="],
 
     "rolldown": ["rolldown@1.2.16", "", { "dependencies": { "@oxc-project/types": "=0.156.0", "@rolldown/pluginutils": "^1.0.0" }, "optionalDependencies": { "@rolldown/binding-android-arm-eabi": "1.2.16", "@rolldown/binding-android-arm64": "1.2.16", "@rolldown/binding-darwin-arm64": "1.2.16", "@rolldown/binding-darwin-x64": "1.2.16", "@rolldown/binding-freebsd-x64": "1.2.16", "@rolldown/binding-linux-arm-gnueabihf": "1.2.16", "@rolldown/binding-linux-arm64-gnu": "1.2.16", "@rolldown/binding-linux-arm64-musl": "1.2.16", "@rolldown/binding-linux-ppc64-gnu": "1.2.16", "@rolldown/binding-linux-s390x-gnu": "1.2.16", "@rolldown/binding-linux-x64-gnu": "1.2.16", "@rolldown/binding-linux-x64-musl": "1.2.16", "@rolldown/binding-openharmony-arm64": "1.2.16", "@rolldown/binding-win32-arm64-msvc": "1.2.16", "@rolldown/binding-win32-x64-msvc": "1.2.16" }, "bin": { "rolldown": "./bin/cli.mjs" } }, "sha512-bWvlMpFKiTfDKfnK7FC2MPgPeWCf/Kpwsq49ApdW+FQaBZb6O6dZ4MAPbPUjp7hYQrw/RobqCzn64BRrQecGHw=="],
 

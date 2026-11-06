@@ -23,8 +23,10 @@ import {
   getViewer,
   sendCode,
   signInPassword,
+  signUpPassword,
   startOAuth,
   verifyCode,
+  verifySignUp,
 } from "@/lib/posts"
 import { APP_NAME } from "@/lib/utils"
 
@@ -39,8 +41,11 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const router = useRouter()
-  const { providers, error: loadError } = Route.useLoaderData()
+  const { providers, signUp, error: loadError } = Route.useLoaderData()
   const [step, setStep] = useState<"options" | "otp" | "password">("options")
+  const [mode, setMode] = useState<"login" | "signup">("login")
+  const joining = mode === "signup"
+  const submitLabel = joining ? "Criar conta" : "Entrar"
   const [email, setEmail] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const from = useEnterFrom()
@@ -102,7 +107,7 @@ function Login() {
             <LogoMark size={40} />
           </div>
           <h1 className="mb-6 text-center text-2xl font-[510] tracking-[-0.012em]">
-            Entrar no {APP_NAME}
+            {joining ? "Criar conta" : "Entrar"} no {APP_NAME}
           </h1>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -123,7 +128,9 @@ function Login() {
                       new FormData(e.currentTarget).get("code"),
                     )
                     run(async () => {
-                      const result = await verifyCode({ data: { email, code } })
+                      const verify =
+                        step === "password" ? verifySignUp : verifyCode
+                      const result = await verify({ data: { email, code } })
                       if (result.error) return result.error
                       await router.navigate({ to: "/admin" })
                       // The root loader holds the viewer, so the navbar needs a refetch.
@@ -146,7 +153,7 @@ function Login() {
                     variant="pill"
                   />
                   <Button type="submit" disabled={busy}>
-                    Entrar
+                    {submitLabel}
                   </Button>
                 </form>
               ) : step === "otp" ? (
@@ -190,6 +197,12 @@ function Login() {
                       password: String(form.get("password")),
                     }
                     run(async () => {
+                      if (joining) {
+                        const result = await signUpPassword({ data })
+                        if (result.error) return result.error
+                        setEmail(data.email.trim())
+                        return null
+                      }
                       const result = await signInPassword({ data })
                       if (result.error) return result.error
                       await router.navigate({ to: "/admin" })
@@ -213,12 +226,12 @@ function Login() {
                     type="password"
                     aria-label="Senha"
                     placeholder="Senha"
-                    autoComplete="current-password"
+                    autoComplete={joining ? "new-password" : "current-password"}
                     required
                     variant="pill"
                   />
                   <Button type="submit" disabled={busy}>
-                    Entrar
+                    {submitLabel}
                   </Button>
                   {back}
                 </form>
@@ -228,6 +241,29 @@ function Login() {
                 </p>
               ) : (
                 <>
+                  {signUp ? (
+                    <div
+                      role="radiogroup"
+                      aria-label="Modo"
+                      className="mb-2 grid grid-cols-2 rounded-full border border-line p-1 text-sm font-[510]"
+                    >
+                      {(["login", "signup"] as const).map((value) => (
+                        <label
+                          key={value}
+                          className="relative rounded-full py-1.5 text-center text-muted transition-colors has-checked:bg-surface has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-muted"
+                        >
+                          <input
+                            type="radio"
+                            name="mode"
+                            className="absolute inset-0 cursor-pointer appearance-none rounded-full outline-none"
+                            checked={mode === value}
+                            onChange={() => setMode(value)}
+                          />
+                          {value === "login" ? "Entrar" : "Criar conta"}
+                        </label>
+                      ))}
+                    </div>
+                  ) : null}
                   {providers.includes("google") ? (
                     <Button
                       type="button"
@@ -235,7 +271,7 @@ function Login() {
                       onClick={() => oauth("google")}
                     >
                       <HugeiconsIcon icon={GoogleIcon} size={16} />
-                      Entrar com Google
+                      {joining ? "Cadastrar" : "Entrar"} com Google
                     </Button>
                   ) : null}
                   {providers.includes("github") ? (
@@ -246,7 +282,7 @@ function Login() {
                       onClick={() => oauth("github")}
                     >
                       <HugeiconsIcon icon={GithubIcon} size={16} />
-                      Entrar com GitHub
+                      {joining ? "Cadastrar" : "Entrar"} com GitHub
                     </Button>
                   ) : null}
                   {providers.includes("otp") ? (

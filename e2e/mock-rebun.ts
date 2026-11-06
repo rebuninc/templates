@@ -6,6 +6,7 @@ type State = {
   users: User[]
   fail: string | null
   providers: string[]
+  permissions: string[]
   projectFail: string | null
   posts: { table: string; values: Row }[]
   patches: { table: string; id: string; values: Row }[]
@@ -20,6 +21,7 @@ const empty = (): State => ({
   users: [],
   fail: null,
   providers: ["google", "github", "otp", "password"],
+  permissions: ["auth:login"],
   projectFail: null,
   posts: [],
   patches: [],
@@ -75,6 +77,24 @@ function handleAuth(req: Request, pathname: string) {
       const user = state.users.find((u) => u.email === body.email)
       if (!user || body.password !== PASSWORD)
         return Response.json({ error: "INVALID_CREDENTIALS" }, { status: 401 })
+      return Response.json({ code: authCode(user) })
+    })
+  if (pathname === "/v1/auth/password/sign-up")
+    return json(req).then((body) => {
+      if (state.users.some((u) => u.email === body.email))
+        return Response.json({ error: "USER_ALREADY_EXISTS" }, { status: 409 })
+      return Response.json(null)
+    })
+  // The user only exists once the email is confirmed, like the real sign-up.
+  if (pathname === "/v1/auth/password/sign-up/verify")
+    return json(req).then((body) => {
+      if (body.code !== OTP)
+        return Response.json({ error: "INVALID_CODE" }, { status: 400 })
+      const user = {
+        id: `u${state.users.length + 1}`,
+        email: String(body.email),
+      }
+      state.users.push(user)
       return Response.json({ code: authCode(user) })
     })
   if (pathname === "/v1/auth/otp/verify")
@@ -196,7 +216,10 @@ Bun.serve({
     if (pathname === "/v1/project/me") {
       if (state.projectFail)
         return Response.json({ error: state.projectFail }, { status: 500 })
-      return Response.json({ providers: state.providers })
+      return Response.json({
+        providers: state.providers,
+        permissions: state.permissions,
+      })
     }
     if (pathname === "/__oauth") {
       const user = state.users[0]
