@@ -4,15 +4,14 @@
 
 ```
 apps/<template>/
-  rebun.json          # manifest: name, frameworks, env and tables (shared)
-  tanstack-start/     # self-contained TanStack Start app
+  tanstack-start/     # self-contained TanStack Start app (one folder per framework)
 ```
 
 1. **Each framework folder is self-contained.** Vercel clones only `apps/<template>/<framework>` into a new repo: no `extends` to the root, no `workspace:*`, no imports outside the folder.
 2. **Same behavior across frameworks.** See `rules/parity.md`.
 3. **The API key stays on the server** (`REBUN_API_KEY`, no public prefix). The SDK runs only in `createServerFn` (TanStack Start).
-4. **`rebun.json` is the source of the tables.** `columns` follows the body of `POST /projects/:id/tables/:name/columns`, `access` the body of `PUT .../access`. `id`, `created_at`, `updated_at` and `owner_id` are automatic, never declare them. `frameworks` lists exactly the folders that exist.
-5. **Package name is `<template>-<framework>`** (e.g. `guestbook-tanstack-start`).
+4. **Tables, access, providers and buckets live in the template's config in the core** (kept by hand). Its spec here describes them; every folder in `apps/<template>/` is a framework app.
+5. **Package name is `<template>-<framework>`** (e.g. `blog-tanstack-start`).
 6. **Env is read from the root `.env` only in dev** (`process.loadEnvFile` in `vite.config.ts`); the clone must work with only the Vercel project env.
 
 ## File Naming

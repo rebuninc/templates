@@ -1,19 +1,16 @@
-import { readdirSync, readFileSync } from "node:fs"
+import { readdirSync } from "node:fs"
 import { defineConfig, type PlaywrightTestConfig } from "@playwright/test"
 
-const templates = readdirSync("apps", { withFileTypes: true }).filter((d) =>
-  d.isDirectory(),
-)
-const targets = templates
-  .flatMap(({ name: template }) => {
-    const manifest = JSON.parse(
-      readFileSync(`apps/${template}/rebun.json`, "utf8"),
-    )
-    return (manifest.frameworks as string[]).map((framework) => ({
-      template,
-      framework,
-    }))
-  })
+// Every folder in apps/<template>/ is a framework app of that template.
+const folders = (path: string) =>
+  readdirSync(path, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+
+const targets = folders("apps")
+  .flatMap((template) =>
+    folders(`apps/${template}`).map((framework) => ({ template, framework })),
+  )
   .map((t, i) => ({ ...t, mockPort: 4100 + i * 2, appPort: 4101 + i * 2 }))
 
 const webServer: PlaywrightTestConfig["webServer"] = targets.flatMap((t) => [

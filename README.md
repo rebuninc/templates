@@ -4,11 +4,12 @@ Apps prontos para deploy na Vercel, integrados ao [`rebun-sdk`](https://www.npmj
 
 ```
 apps/<template>/
-  rebun.json          # manifesto: nome, frameworks, env e tabelas (compartilhado)
-  tanstack-start/     # app TanStack Start autossuficiente
+  tanstack-start/     # app TanStack Start autossuficiente (uma pasta por framework)
 ```
 
 Frameworks: `tanstack-start`.
+
+Templates: `blog` (lista pública de posts, login OTP/Google e CRUD dos próprios posts).
 
 ## Regras
 
@@ -16,14 +17,14 @@ Veja [`rules/`](./rules/index.md) — estrutura dos templates em [`rules/archite
 
 ## Fluxo do botão no core
 
-1. Usuário escolhe o template e o framework (de `rebun.json` → `frameworks`).
-2. Core lê `apps/<template>/rebun.json` (raw do GitHub), cria as tabelas e o acesso, e gera uma API key.
+1. Usuário escolhe o template e o framework (config do template no core, mantida à mão).
+2. Core cria as tabelas, o acesso, os providers e os buckets da config e gera uma API key.
 3. Mostra a key e abre:
 
 ```
 https://vercel.com/new/clone
   ?repository-url=https://github.com/rebuninc/templates/tree/main/apps/<template>/<framework>
-  &env=REBUN_API_KEY                       # rebun.json → env.join(",")
+  &env=REBUN_API_KEY
   &envDescription=API%20key%20do%20projeto%20Rebun
   &project-name=rebun-<template>
 ```
@@ -37,7 +38,7 @@ Todos os apps leem o `.env` da raiz (`process.loadEnvFile` no `vite.config.ts`).
 ```sh
 bun install
 cp .env.example .env
-bun --filter guestbook-tanstack-start dev
+bun --filter blog-tanstack-start dev
 ```
 
-Novo template: copie `apps/guestbook`, troque `name` em cada `package.json` e o `rebun.json`.
+Novo template: copie `apps/blog`, troque `name` em cada `package.json` e registre a config no core.

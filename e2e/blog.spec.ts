@@ -1,0 +1,234 @@
+import { expect, type Page, test } from "@playwright/test"
+
+type State = {
+  posts: { table: string; values: Record<string, unknown> }[]
+  patches: { table: string; id: string; values: Record<string, unknown> }[]
+  deletes: { table: string; id: string }[]
+  uploads: string[]
+  removedFiles: string[]
+}
+
+const mockUrl = () => test.info().project.metadata.mockUrl as string
+
+async function setMock(state: Record<string, unknown>) {
+  await fetch(`${mockUrl()}/__state`, {
+    method: "POST",
+    body: JSON.stringify(state),
+  })
+}
+
+async function mock() {
+  const res = await fetch(`${mockUrl()}/__state`)
+  const state = (await res.json()) as State
+  return state
+}
+
+// Animations would race the assertions; the spec says reduced motion shows everything at once.
+test.use({ contextOptions: { reducedMotion: "reduce" } })
+
+// Wait for hydration so forms submit through JS, not natively.
+const open = (page: Page, path: string) =>
+  page.goto(path, { waitUntil: "networkidle" })
+
+const user = { id: "u1", email: "ana@exemplo.com" }
+
+const post = (
+  id: string,
+  title: string,
+  day: string,
+  extra: Record<string, unknown> = {},
+) => ({
+  id,
+  owner_id: user.id,
+  title,
+  slug: `post-${id}`,
+  content: `Primeira linha de ${title}\nSegunda linha`,
+  published: "true",
+  image: null,
+  tags: null,
+  created_at: `2026-01-${day}T00:00:00.000Z`,
+  updated_at: `2026-01-${day}T00:00:00.000Z`,
+  ...extra,
+})
+
+test.beforeEach(async () => {
+  await setMock({
+    users: [user],
+    tables: {
+      posts: [
+        post("1", "Primeiro", "01", { tags: ["a"] }),
+        post("2", "Segundo", "02", { tags: ["b", "c"], image: "x.png" }),
+        post("3", "Rascunho", "03", { published: "false" }),
+      ],
+    },
+  })
+})
+
+async function login(page: Page) {
+  await open(page, "/login")
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByRole("button", { name: "Enviar código" }).click()
+  await page.getByPlaceholder("Código").fill("123456")
+  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  await page.waitForLoadState("networkidle")
+}
+
+const card = (page: Page, title: string) =>
+  page.getByRole("listitem").filter({ hasText: title })
+
+test("lists only published posts, newest first", async ({ page }) => {
+  await open(page, "/")
+  await expect(page.locator("main")).toMatchAriaSnapshot({
+    name: "list.aria.yml",
+  })
+})
+
+test("shows the load error", async ({ page }) => {
+  await setMock({ fail: "BOOM" })
+  await open(page, "/")
+  await expect(page.locator("main").getByRole("alert")).toHaveText(
+    "Erro ao carregar: BOOM",
+  )
+})
+
+test("shows a published post", async ({ page }) => {
+  await open(page, "/")
+  await page.getByRole("link", { name: "Segundo" }).click()
+  await expect(page).toHaveURL(/\/posts\/post-2$/)
+  await expect(page.locator("main")).toMatchAriaSnapshot({
+    name: "detail.aria.yml",
+  })
+})
+
+test("hides a draft from visitors", async ({ page }) => {
+  await open(page, "/posts/post-3")
+  await expect(
+    page.getByRole("heading", { name: "Post não encontrado" }),
+  ).toBeVisible()
+})
+
+test("logs in with the OTP code", async ({ page }) => {
+  await login(page)
+  await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
+  await expect(card(page, "Rascunho")).toContainText("Rascunho")
+})
+
+test("shows a wrong OTP code", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByRole("button", { name: "Enviar código" }).click()
+  await page.getByPlaceholder("Código").fill("000000")
+  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await expect(page.getByRole("alert")).toHaveText(
+    "Erro ao entrar: INVALID_CODE",
+  )
+  await expect(page.getByPlaceholder("Código")).toBeVisible()
+})
+
+test("refuses an email without an account", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByPlaceholder("E-mail").fill("nova@exemplo.com")
+  await page.getByRole("button", { name: "Enviar código" }).click()
+  await page.getByPlaceholder("Código").fill("123456")
+  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await expect(page.getByRole("alert")).toHaveText(
+    "Erro ao entrar: SIGNUP_NOT_ALLOWED",
+  )
+})
+
+test("logs in with Google through the callback", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Entrar com Google" }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
+})
+
+test("sends visitors from /admin to /login", async ({ page }) => {
+  await open(page, "/admin")
+  await expect(page).toHaveURL(/\/login$/)
+})
+
+test("creates a post with a trimmed title, tags and image", async ({
+  page,
+}) => {
+  await login(page)
+  await page.getByRole("link", { name: "Novo post" }).click()
+  await page.waitForLoadState("networkidle")
+  await page.getByLabel("Título").fill("  Olá Mundo  ")
+  await page.getByLabel("Conteúdo").fill("  Texto  ")
+  await page.getByLabel("Tags").fill(" a, ,b ")
+  await page.getByLabel("Imagem").setInputFiles({
+    name: "capa.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("png"),
+  })
+  await page.getByLabel("Publicado").check()
+  await page.getByRole("button", { name: "Salvar" }).click()
+
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(card(page, "Olá Mundo")).toBeVisible()
+  const { posts, uploads } = await mock()
+  expect(uploads).toHaveLength(1)
+  expect(uploads[0]).toMatch(/-capa\.png$/)
+  expect(posts).toEqual([
+    {
+      table: "posts",
+      values: {
+        title: "Olá Mundo",
+        content: "Texto",
+        tags: ["a", "b"],
+        published: "true",
+        image: uploads[0],
+        slug: expect.stringMatching(/^ola-mundo-[0-9a-f]{6}$/),
+      },
+    },
+  ])
+})
+
+test("refuses a blank title", async ({ page }) => {
+  await login(page)
+  await page.getByRole("link", { name: "Novo post" }).click()
+  await page.waitForLoadState("networkidle")
+  await page.getByLabel("Título").fill("   ")
+  await page.getByLabel("Conteúdo").fill("   ")
+  await page.getByRole("button", { name: "Salvar" }).click()
+  await expect(page.getByRole("alert")).toHaveText("Preencha título e conteúdo")
+  const { posts } = await mock()
+  expect(posts).toEqual([])
+})
+
+test("edits a post without changing its slug", async ({ page }) => {
+  await login(page)
+  await card(page, "Primeiro").getByRole("link", { name: "Editar" }).click()
+  await page.waitForLoadState("networkidle")
+  await page.getByLabel("Título").fill("Primeiro editado")
+  await page.getByRole("button", { name: "Salvar" }).click()
+
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(card(page, "Primeiro editado")).toBeVisible()
+  const { patches } = await mock()
+  expect(patches).toHaveLength(1)
+  expect(patches[0].id).toBe("1")
+  expect(patches[0].values.title).toBe("Primeiro editado")
+  expect(patches[0].values).not.toHaveProperty("slug")
+})
+
+test("deletes a post and its image", async ({ page }) => {
+  await login(page)
+  page.once("dialog", (dialog) => dialog.accept())
+  await card(page, "Segundo").getByRole("button", { name: "Excluir" }).click()
+
+  await expect(card(page, "Segundo")).toHaveCount(0)
+  const { deletes, removedFiles } = await mock()
+  expect(deletes).toEqual([{ table: "posts", id: "2" }])
+  expect(removedFiles).toEqual(["x.png"])
+})
+
+test("signs out", async ({ page }) => {
+  await login(page)
+  await page.getByRole("button", { name: "Sair" }).click()
+  await expect(page).toHaveURL(/\/login$/)
+  await open(page, "/admin")
+  await expect(page).toHaveURL(/\/login$/)
+})

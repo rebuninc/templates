@@ -1,0 +1,11 @@
+- main:
+  - link "← Posts"
+  - article:
+    - heading "Segundo" [level=1]
+    - paragraph:
+      - time: 02/01/2026
+    - list "Tags":
+      - listitem: b
+      - listitem: c
+    - paragraph: Primeira linha de Segundo
+    - paragraph: Segunda linha

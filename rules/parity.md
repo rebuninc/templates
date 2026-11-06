@@ -21,13 +21,13 @@ If a difference is forced by the framework and is visible to the user, record it
 
 ## Workflow
 
-1. **A change to a template is applied to every folder listed in `frameworks` of its `rebun.json`, in the same change.** Never leave a framework for later.
+1. **A change to a template is applied to every framework folder in `apps/<template>/`, in the same change.** Never leave a framework for later.
 2. **Specs describe behavior once, for all frameworks**, and list the files changed in each framework.
 3. **Before finishing, compare the frameworks side by side** (e.g. `diff <a>/lib/rebun.ts tanstack-start/src/lib/rebun.ts` and reading the equivalent route/page files) and check every item in "Must be identical".
 4. **Adding a new framework** means porting the whole current behavior of the template — no partial ports.
 
 ## E2E parity tests
 
-1. **Every template has `e2e/<template>.spec.ts`**; it runs against each framework in its `rebun.json` (see `playwright.config.ts`).
+1. **Every template has `e2e/<template>.spec.ts`**; it runs against each framework folder in `apps/<template>/` (see `playwright.config.ts`).
 2. **The ARIA snapshots in `e2e/__snapshots__/` are shared by all frameworks.** Never create a per-framework snapshot; if the UI changes, update the snapshot once and every framework must match it.
 3. A UI or behavior change in a template updates its spec file in the same change, and `bun run test:e2e` must pass for every framework.

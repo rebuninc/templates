@@ -1,5 +1,8 @@
 # Spec: ui-parity-e2e
 
+## Relacionadas
+- Alterada por: [002 — blog](./002-blog.md) — remove o template guestbook (os testes cobrem só o blog) e o `rebun.json` (frameworks pelas pastas)
+
 ## Objetivo
 Garantir com testes E2E (Playwright) que cada template tem a mesma UI e o mesmo comportamento em todos os frameworks: os mesmos cenários rodam contra cada framework e comparam com o mesmo snapshot.
 
@@ -10,11 +13,11 @@ Garantir com testes E2E (Playwright) que cada template tem a mesma UI e o mesmo 
 - Estilo visual (screenshots).
 
 ## Comportamento
-1. `bun run test:e2e` na raiz sobe, para cada framework listado em `apps/<template>/rebun.json`, um mock da API Rebun e o dev server do app apontando para ele (`REBUN_URL`), e roda `e2e/<template>.spec.ts` contra cada um (um project do Playwright por framework).
+1. `bun run test:e2e` na raiz sobe, para cada pasta de framework em `apps/<template>/`, um mock da API Rebun e o dev server do app apontando para ele (`REBUN_URL`), e roda `e2e/<template>.spec.ts` contra cada um (um project do Playwright por framework).
 2. O mock (`e2e/mock-rebun.ts`) responde `GET`/`POST /v1/tables/:name/records` em memória e expõe `/__state` para o teste definir os registros, forçar erro na leitura e ler o que foi enviado.
 3. A estrutura acessível do `<main>` é comparada com um ARIA snapshot **compartilhado entre os frameworks** (o caminho do snapshot não inclui o nome do project), então qualquer diferença de texto, papel ou ordem quebra o teste.
 4. Atributos que não aparecem no ARIA snapshot (`required`, `maxLength`, `placeholder`) são verificados explicitamente.
-5. Um template novo precisa de `e2e/<template>.spec.ts`; o config descobre templates e frameworks pelos `rebun.json`.
+5. Um template novo precisa de `e2e/<template>.spec.ts`; o config descobre templates e frameworks pelas pastas de `apps/`.
 6. Antes da primeira execução: `bunx playwright install chromium`.
 
 ## Casos de borda

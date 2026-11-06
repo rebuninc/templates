@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import { nitro } from "nitro/vite"
@@ -9,7 +10,7 @@ try {
 } catch {}
 
 export default defineConfig({
-  server: { port: 3001 },
+  server: { port: 3002 },
   resolve: { tsconfigPaths: true },
-  plugins: [tanstackStart(), nitro(), viteReact()],
+  plugins: [tailwindcss(), tanstackStart(), nitro(), viteReact()],
 })
