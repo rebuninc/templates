@@ -39,6 +39,8 @@ export const Route = createRootRoute({
         href: "https://fonts.googleapis.com/css2?family=Urbanist:wght@400..700&display=swap",
       },
       { rel: "stylesheet", href: styles },
+      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+      { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
     ],
   }),
   component: Root,

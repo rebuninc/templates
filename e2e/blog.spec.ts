@@ -428,3 +428,13 @@ for (const reduce of [false, true]) {
     })
   })
 }
+
+test("serves the favicon", async ({ page, request }) => {
+  await open(page, "/")
+  const icons = page.locator('head link[rel="icon"]')
+  await expect(icons).toHaveCount(2)
+  for (const path of ["/icon.svg", "/favicon.ico"]) {
+    const res = await request.get(path)
+    expect(res.status()).toBe(200)
+  }
+})
