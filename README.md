@@ -13,12 +13,7 @@ Frameworks: `next`, `tanstack-start`.
 
 ## Regras
 
-1. **Cada pasta de framework é autossuficiente.** A Vercel clona só `apps/<template>/<framework>` para um repo novo: nada de `extends` para a raiz, `workspace:*` ou imports fora da pasta.
-2. **Mesmo comportamento em todos os frameworks.** Mesmas telas, mesmas tabelas, mesmo `Schema` em `lib/rebun.ts`. Mudou em um, muda nos outros.
-3. **Versões exatas** em todo `package.json` (sem lockfile no clone, o install usa os pins). Exceção: `nitro` só tem release `rc`, e a Vercel exige ele para TanStack Start.
-4. **A chave fica no servidor** (`REBUN_API_KEY`, sem prefixo público). O SDK roda em Server Components/Actions (Next) e `createServerFn` (TanStack Start).
-5. **`rebun.json` é a fonte das tabelas.** `columns` segue o body de `POST /projects/:id/tables/:name/columns`, `access` o de `PUT .../access`. `id`, `created_at`, `updated_at` e `owner_id` são automáticos. `frameworks` lista as pastas que existem.
-6. **Nome do pacote:** `<template>-<framework>` (ex.: `guestbook-next`).
+Veja [`rules/`](./rules/index.md) — estrutura dos templates em [`rules/architecture.md`](./rules/architecture.md).
 
 ## Fluxo do botão no core
 

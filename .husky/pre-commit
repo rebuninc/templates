@@ -1,0 +1,2 @@
+bun run biome
+bun run typecheck
