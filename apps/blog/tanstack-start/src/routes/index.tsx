@@ -23,7 +23,7 @@ function Home() {
         Posts
       </h1>
       {error ? (
-        <p role="alert" className="text-red-400">
+        <p role="alert" className="animate-alert-in text-red-400">
           Erro ao carregar: {error}
         </p>
       ) : (

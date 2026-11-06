@@ -10,12 +10,14 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router"
+import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { LogoMark } from "@/components/logo"
 import { NightSilk } from "@/components/night-silk"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { enter, spring, useEnterFrom } from "@/lib/motion"
 import {
   getProviders,
   getViewer,
@@ -41,6 +43,7 @@ function Login() {
   const [step, setStep] = useState<"options" | "otp" | "password">("options")
   const [email, setEmail] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const from = useEnterFrom()
 
   useEffect(() => {
     // Fixed id so StrictMode's double effect shows a single toast.
@@ -101,157 +104,173 @@ function Login() {
           <h1 className="mb-6 text-center text-2xl font-[510] tracking-[-0.012em]">
             Entrar no {APP_NAME}
           </h1>
-          {email ? (
-            <form
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={email ? "code" : step}
+              initial={from}
+              animate="show"
+              exit={{ opacity: 0, transition: { duration: 0.12 } }}
+              variants={enter}
+              transition={spring}
               className="grid gap-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-                const code = String(new FormData(e.currentTarget).get("code"))
-                run(async () => {
-                  const result = await verifyCode({ data: { email, code } })
-                  if (result.error) return result.error
-                  await router.navigate({ to: "/admin" })
-                  // The root loader holds the viewer, so the navbar needs a refetch.
-                  await router.invalidate()
-                  return null
-                })
-              }}
             >
-              <p className="text-center text-muted">
-                Enviamos um código para {email}.
-              </p>
-              <Input
-                name="code"
-                aria-label="Código"
-                placeholder="Código"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                required
-                maxLength={6}
-                variant="pill"
-              />
-              <Button type="submit" disabled={busy}>
-                Entrar
-              </Button>
-            </form>
-          ) : step === "otp" ? (
-            <form
-              className="grid gap-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-                const value = String(new FormData(e.currentTarget).get("email"))
-                run(async () => {
-                  const result = await sendCode({ data: value })
-                  if (result.error) return result.error
-                  setEmail(value.trim())
-                  return null
-                })
-              }}
-            >
-              <Input
-                name="email"
-                type="email"
-                aria-label="E-mail"
-                placeholder="E-mail"
-                required
-                autoFocus
-                variant="pill"
-              />
-              <Button type="submit" disabled={busy}>
-                Enviar código
-              </Button>
-              {back}
-            </form>
-          ) : step === "password" ? (
-            <form
-              className="grid gap-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-                const form = new FormData(e.currentTarget)
-                const data = {
-                  email: String(form.get("email")),
-                  password: String(form.get("password")),
-                }
-                run(async () => {
-                  const result = await signInPassword({ data })
-                  if (result.error) return result.error
-                  await router.navigate({ to: "/admin" })
-                  // The root loader holds the viewer, so the navbar needs a refetch.
-                  await router.invalidate()
-                  return null
-                })
-              }}
-            >
-              <Input
-                name="email"
-                type="email"
-                aria-label="E-mail"
-                placeholder="E-mail"
-                required
-                autoFocus
-                variant="pill"
-              />
-              <Input
-                name="password"
-                type="password"
-                aria-label="Senha"
-                placeholder="Senha"
-                autoComplete="current-password"
-                required
-                variant="pill"
-              />
-              <Button type="submit" disabled={busy}>
-                Entrar
-              </Button>
-              {back}
-            </form>
-          ) : loadError ? null : providers.length === 0 ? (
-            <p className="text-center text-muted">
-              Nenhum método de login ativo.
-            </p>
-          ) : (
-            <>
-              {providers.includes("google") ? (
-                <Button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => oauth("google")}
+              {email ? (
+                <form
+                  className="grid gap-4"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    const code = String(
+                      new FormData(e.currentTarget).get("code"),
+                    )
+                    run(async () => {
+                      const result = await verifyCode({ data: { email, code } })
+                      if (result.error) return result.error
+                      await router.navigate({ to: "/admin" })
+                      // The root loader holds the viewer, so the navbar needs a refetch.
+                      await router.invalidate()
+                      return null
+                    })
+                  }}
                 >
-                  <HugeiconsIcon icon={GoogleIcon} size={16} />
-                  Entrar com Google
-                </Button>
-              ) : null}
-              {providers.includes("github") ? (
-                <Button
-                  type="button"
-                  disabled={busy}
-                  variant="secondary"
-                  onClick={() => oauth("github")}
+                  <p className="text-center text-muted">
+                    Enviamos um código para {email}.
+                  </p>
+                  <Input
+                    name="code"
+                    aria-label="Código"
+                    placeholder="Código"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    maxLength={6}
+                    variant="pill"
+                  />
+                  <Button type="submit" disabled={busy}>
+                    Entrar
+                  </Button>
+                </form>
+              ) : step === "otp" ? (
+                <form
+                  className="grid gap-4"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    const value = String(
+                      new FormData(e.currentTarget).get("email"),
+                    )
+                    run(async () => {
+                      const result = await sendCode({ data: value })
+                      if (result.error) return result.error
+                      setEmail(value.trim())
+                      return null
+                    })
+                  }}
                 >
-                  <HugeiconsIcon icon={GithubIcon} size={16} />
-                  Entrar com GitHub
-                </Button>
-              ) : null}
-              {providers.includes("otp") ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setStep("otp")}
+                  <Input
+                    name="email"
+                    type="email"
+                    aria-label="E-mail"
+                    placeholder="E-mail"
+                    required
+                    autoFocus
+                    variant="pill"
+                  />
+                  <Button type="submit" disabled={busy}>
+                    Enviar código
+                  </Button>
+                  {back}
+                </form>
+              ) : step === "password" ? (
+                <form
+                  className="grid gap-4"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    const form = new FormData(e.currentTarget)
+                    const data = {
+                      email: String(form.get("email")),
+                      password: String(form.get("password")),
+                    }
+                    run(async () => {
+                      const result = await signInPassword({ data })
+                      if (result.error) return result.error
+                      await router.navigate({ to: "/admin" })
+                      // The root loader holds the viewer, so the navbar needs a refetch.
+                      await router.invalidate()
+                      return null
+                    })
+                  }}
                 >
-                  Continuar com e-mail
-                </Button>
-              ) : null}
-              {providers.includes("password") ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setStep("password")}
-                >
-                  Continuar com senha
-                </Button>
-              ) : null}
-            </>
-          )}
+                  <Input
+                    name="email"
+                    type="email"
+                    aria-label="E-mail"
+                    placeholder="E-mail"
+                    required
+                    autoFocus
+                    variant="pill"
+                  />
+                  <Input
+                    name="password"
+                    type="password"
+                    aria-label="Senha"
+                    placeholder="Senha"
+                    autoComplete="current-password"
+                    required
+                    variant="pill"
+                  />
+                  <Button type="submit" disabled={busy}>
+                    Entrar
+                  </Button>
+                  {back}
+                </form>
+              ) : loadError ? null : providers.length === 0 ? (
+                <p className="text-center text-muted">
+                  Nenhum método de login ativo.
+                </p>
+              ) : (
+                <>
+                  {providers.includes("google") ? (
+                    <Button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => oauth("google")}
+                    >
+                      <HugeiconsIcon icon={GoogleIcon} size={16} />
+                      Entrar com Google
+                    </Button>
+                  ) : null}
+                  {providers.includes("github") ? (
+                    <Button
+                      type="button"
+                      disabled={busy}
+                      variant="secondary"
+                      onClick={() => oauth("github")}
+                    >
+                      <HugeiconsIcon icon={GithubIcon} size={16} />
+                      Entrar com GitHub
+                    </Button>
+                  ) : null}
+                  {providers.includes("otp") ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStep("otp")}
+                    >
+                      Continuar com e-mail
+                    </Button>
+                  ) : null}
+                  {providers.includes("password") ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStep("password")}
+                    >
+                      Continuar com senha
+                    </Button>
+                  ) : null}
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </main>

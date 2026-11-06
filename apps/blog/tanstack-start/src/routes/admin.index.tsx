@@ -26,7 +26,7 @@ function Admin() {
         Meus posts
       </h1>
       {error || failed ? (
-        <p role="alert" className="text-red-400">
+        <p role="alert" className="animate-alert-in text-red-400">
           {error ? `Erro ao carregar: ${error}` : failed}
         </p>
       ) : null}
@@ -37,13 +37,13 @@ function Admin() {
             <Link
               to="/admin/$postId/edit"
               params={{ postId: post.id }}
-              className="rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 backdrop-blur-md hover:bg-bg"
+              className="press rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 backdrop-blur-md hover:bg-bg"
             >
               Editar
             </Link>
             <button
               type="button"
-              className="rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 text-red-400 backdrop-blur-md hover:bg-bg"
+              className="press rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 text-red-400 backdrop-blur-md hover:bg-bg"
               onClick={async () => {
                 if (!window.confirm(`Excluir "${post.title}"?`)) return
                 setFailed(null)

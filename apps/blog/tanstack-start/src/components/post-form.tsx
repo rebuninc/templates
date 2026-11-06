@@ -68,7 +68,7 @@ export function PostForm({ post }: { post?: Post }) {
         Publicado
       </label>
       {error ? (
-        <p role="alert" className="text-red-400">
+        <p role="alert" className="animate-alert-in text-red-400">
           {error}
         </p>
       ) : null}

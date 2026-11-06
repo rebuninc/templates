@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { Link } from "@tanstack/react-router"
 
 const pill =
-  "flex items-center gap-1 rounded-full border border-line px-3.5 py-1.5 hover:bg-surface aria-disabled:pointer-events-none aria-disabled:opacity-40"
+  "press flex items-center gap-1 rounded-full border border-line px-3.5 py-1.5 hover:bg-surface aria-disabled:pointer-events-none aria-disabled:opacity-40"
 
 // Page 1 has no ?page in the URL, so links stay clean.
 const search = (page: number) => ({ page: page > 1 ? page : undefined })

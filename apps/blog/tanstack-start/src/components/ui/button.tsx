@@ -13,7 +13,7 @@ export function Button({
   return (
     <button
       {...props}
-      className={`flex h-10 items-center justify-center gap-2 rounded-full px-5 text-sm font-[510] disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`press flex h-10 items-center justify-center gap-2 rounded-full px-5 text-sm font-[510] disabled:opacity-50 ${variants[variant]} ${className}`}
     />
   )
 }

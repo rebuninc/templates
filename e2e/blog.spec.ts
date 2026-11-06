@@ -374,3 +374,57 @@ test.describe("login shader", () => {
     await expect(page.locator("canvas")).toBeHidden()
   })
 })
+
+// Records every non-none transform on the matching elements, frame by frame.
+async function watchTransforms(page: Page, selector: string) {
+  type Seen = { __transforms: string[] }
+  await page.evaluate((sel) => {
+    const seen: string[] = []
+    ;(window as unknown as Seen).__transforms = seen
+    const tick = () => {
+      for (const el of document.querySelectorAll(sel)) {
+        const transform = getComputedStyle(el).transform
+        if (transform !== "none") seen.push(transform)
+      }
+      requestAnimationFrame(tick)
+    }
+    tick()
+  }, selector)
+  return () => page.evaluate(() => (window as unknown as Seen).__transforms)
+}
+
+test("renders the server HTML visible", async ({ request }) => {
+  for (const path of ["/", "/posts/post-2", "/login"]) {
+    const res = await request.get(path)
+    const html = await res.text()
+    expect(html).not.toContain("opacity:0")
+  }
+})
+
+for (const reduce of [false, true]) {
+  test.describe(reduce ? "with reduced motion" : "with motion", () => {
+    test.use({ reducedMotion: reduce ? "reduce" : "no-preference" })
+
+    test("animates the page entrance", async ({ page }) => {
+      await open(page, "/")
+      const transforms = await watchTransforms(page, "[data-page], main h1")
+      await page.getByRole("link", { name: "Segundo" }).click()
+      await expect(page.getByRole("heading", { name: "Segundo" })).toBeVisible()
+      await page.waitForTimeout(600)
+      const seen = await transforms()
+      if (reduce) expect(seen).toEqual([])
+      else expect(seen.length).toBeGreaterThan(0)
+    })
+
+    test("animates the user menu", async ({ page }) => {
+      await login(page)
+      const transforms = await watchTransforms(page, "#user-menu")
+      await page.getByRole("button", { name: "Conta" }).click()
+      await expect(page.getByRole("button", { name: "Sair" })).toBeVisible()
+      await page.waitForTimeout(300)
+      const seen = await transforms()
+      if (reduce) expect(seen).toEqual([])
+      else expect(seen.length).toBeGreaterThan(0)
+    })
+  })
+}

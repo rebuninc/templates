@@ -49,3 +49,56 @@
   animation: progress-secondary 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) 1.15s
     infinite;
 }
+
+@utility press {
+  transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  @media (prefers-reduced-motion: no-preference) {
+    &:active:not(:disabled, [aria-disabled="true"]) {
+      scale: 0.97;
+    }
+  }
+}
+
+.menu-pop {
+  opacity: 0;
+  transform-origin: top right;
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    display 150ms allow-discrete,
+    overlay 150ms allow-discrete;
+  &:popover-open {
+    opacity: 1;
+    @starting-style {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .menu-pop:popover-open {
+    @starting-style {
+      transform: scale(0.96);
+    }
+  }
+}
+
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.animate-alert-in {
+  animation: alert-in 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  @media (prefers-reduced-motion: reduce) {
+    animation-name: fade-in;
+  }
+}
