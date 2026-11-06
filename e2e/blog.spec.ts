@@ -75,8 +75,7 @@ async function login(page: Page) {
   await page.getByRole("button", { name: "Continuar com e-mail" }).click()
   await page.getByPlaceholder("E-mail").fill(user.email)
   await page.getByRole("button", { name: "Enviar código" }).click()
-  await page.getByPlaceholder("Código").fill("123456")
-  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await page.getByLabel("Código").fill("123456")
   await expect(page).toHaveURL(/\/admin$/)
   await page.waitForLoadState("networkidle")
 }
@@ -137,12 +136,23 @@ test("shows a wrong OTP code", async ({ page }) => {
   await page.getByRole("button", { name: "Continuar com e-mail" }).click()
   await page.getByPlaceholder("E-mail").fill(user.email)
   await page.getByRole("button", { name: "Enviar código" }).click()
-  await page.getByPlaceholder("Código").fill("000000")
-  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await page.getByLabel("Código").fill("000000")
   await expect(toast(page)).toHaveText("Erro ao entrar: INVALID_CODE")
   await expect(toast(page)).toHaveAttribute("data-y-position", "top")
   await expect(toast(page)).toHaveAttribute("data-x-position", "center")
-  await expect(page.getByPlaceholder("Código")).toBeVisible()
+  await expect(page.getByLabel("Código")).toBeVisible()
+  await expect(page.getByText("0 de 6 dígitos")).toBeAttached()
+})
+
+test("focuses the code and keeps only digits", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com e-mail" }).click()
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByRole("button", { name: "Enviar código" }).click()
+  await expect(page.getByLabel("Código")).toBeFocused()
+  await page.getByLabel("Código").fill("1a2-3")
+  await expect(page.getByText("3 de 6 dígitos")).toBeAttached()
+  await expect(page).toHaveURL(/\/login$/)
 })
 
 test("refuses an email without an account", async ({ page }) => {
@@ -150,8 +160,7 @@ test("refuses an email without an account", async ({ page }) => {
   await page.getByRole("button", { name: "Continuar com e-mail" }).click()
   await page.getByPlaceholder("E-mail").fill("nova@exemplo.com")
   await page.getByRole("button", { name: "Enviar código" }).click()
-  await page.getByPlaceholder("Código").fill("123456")
-  await page.getByRole("button", { name: "Entrar", exact: true }).click()
+  await page.getByLabel("Código").fill("123456")
   await expect(toast(page)).toHaveText("Erro ao entrar: SIGNUP_NOT_ALLOWED")
 })
 
@@ -263,8 +272,7 @@ test("signs up with email, password and code", async ({ page }) => {
   await expect(
     page.getByText("Enviamos um código para nova@exemplo.com."),
   ).toBeVisible()
-  await page.getByPlaceholder("Código").fill("123456")
-  await page.getByRole("button", { name: "Criar conta", exact: true }).click()
+  await page.getByLabel("Código").fill("123456")
   await expect(page).toHaveURL(/\/admin$/)
   await expect(page.getByRole("heading", { name: "Meus posts" })).toBeVisible()
 })

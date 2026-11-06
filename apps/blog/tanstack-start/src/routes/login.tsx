@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import { LogoMark } from "@/components/logo"
 import { NightSilk } from "@/components/night-silk"
 import { Button } from "@/components/ui/button"
+import { CodeSlots, type CodeSlotsStatus } from "@/components/ui/code-slots"
 import { Input } from "@/components/ui/input"
 import { enter, spring, useEnterFrom } from "@/lib/motion"
 import {
@@ -48,6 +49,8 @@ function Login() {
   const submitLabel = joining ? "Criar conta" : "Entrar"
   const [email, setEmail] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [code, setCode] = useState("")
+  const [codeStatus, setCodeStatus] = useState<CodeSlotsStatus>("idle")
   const from = useEnterFrom()
 
   useEffect(() => {
@@ -70,6 +73,22 @@ function Login() {
       window.location.href = result.url
       return null
     })
+
+  const submitCode = (address: string, code: string) => {
+    if (busy || code.length < 6) return
+    run(async () => {
+      const verify = step === "password" ? verifySignUp : verifyCode
+      const result = await verify({ data: { email: address, code } })
+      if (result.error) {
+        setCodeStatus("error")
+        return result.error
+      }
+      await router.navigate({ to: "/admin" })
+      // The root loader holds the viewer, so the navbar needs a refetch.
+      await router.invalidate()
+      return null
+    })
+  }
 
   const back = (
     <button
@@ -124,33 +143,26 @@ function Login() {
                   className="grid gap-4"
                   onSubmit={(e) => {
                     e.preventDefault()
-                    const code = String(
-                      new FormData(e.currentTarget).get("code"),
-                    )
-                    run(async () => {
-                      const verify =
-                        step === "password" ? verifySignUp : verifyCode
-                      const result = await verify({ data: { email, code } })
-                      if (result.error) return result.error
-                      await router.navigate({ to: "/admin" })
-                      // The root loader holds the viewer, so the navbar needs a refetch.
-                      await router.invalidate()
-                      return null
-                    })
+                    submitCode(email, code)
                   }}
                 >
                   <p className="text-center text-muted">
                     Enviamos um código para {email}.
                   </p>
-                  <Input
-                    name="code"
-                    aria-label="Código"
-                    placeholder="Código"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    required
-                    maxLength={6}
-                    variant="pill"
+                  <CodeSlots
+                    ariaLabel="Código"
+                    autoFocus
+                    status={codeStatus}
+                    onChange={(value) => {
+                      setCode(value)
+                      if (value) setCodeStatus("idle")
+                    }}
+                    onComplete={(value) => submitCode(email, value)}
+                    accentColor="#f7f8f8"
+                    inkColor="#f7f8f8"
+                    slotColor="#1c1c1f"
+                    digitColor="#08090a"
+                    className="justify-self-center"
                   />
                   <Button type="submit" disabled={busy}>
                     {submitLabel}
