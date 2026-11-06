@@ -14,6 +14,8 @@ type State = {
   uploads: string[]
   removedFiles: string[]
   delay: number
+  // Columns each table keeps unique, like the core's unique constraint.
+  unique: Record<string, string[]>
 }
 
 const empty = (): State => ({
@@ -29,6 +31,7 @@ const empty = (): State => ({
   uploads: [],
   removedFiles: [],
   delay: 0,
+  unique: {},
 })
 let state = empty()
 
@@ -153,6 +156,16 @@ async function handleFiles(req: Request, bucket: string, path?: string) {
   return Response.json({ error: "NOT_FOUND" }, { status: 404 })
 }
 
+const conflict = (table: string, row: Row) =>
+  (state.unique[table] ?? []).some((column) =>
+    state.tables[table].some(
+      (other) => other.id !== row.id && other[column] === row[column],
+    ),
+  )
+
+const unique = () =>
+  Response.json({ error: "UNIQUE_VIOLATION" }, { status: 409 })
+
 async function handleRecords(req: Request, table: string, id?: string) {
   state.tables[table] ??= []
   const rows = state.tables[table]
@@ -169,6 +182,7 @@ async function handleRecords(req: Request, table: string, id?: string) {
       return Response.json(null)
     }
     const { values } = (await req.json()) as { values: Row }
+    if (conflict(table, { ...row, ...values })) return unique()
     state.patches.push({ table, id, values })
     Object.assign(row, values, { updated_at: now })
     return Response.json(row)
@@ -188,7 +202,6 @@ async function handleRecords(req: Request, table: string, id?: string) {
   }
 
   const { values } = (await req.json()) as { values: Row }
-  state.posts.push({ table, values })
   const row = {
     id: crypto.randomUUID(),
     owner_id: userOf(req)?.id ?? null,
@@ -196,6 +209,8 @@ async function handleRecords(req: Request, table: string, id?: string) {
     created_at: now,
     updated_at: now,
   }
+  if (conflict(table, row)) return unique()
+  state.posts.push({ table, values })
   rows.push(row)
   return Response.json(row, { status: 201 })
 }

@@ -9,7 +9,10 @@ apps/<template>/
 
 Frameworks: `tanstack-start`.
 
-Templates: `blog` (lista pública de posts, login OTP/Google e CRUD dos próprios posts).
+Templates:
+
+- `blog` (lista pública de posts, login OTP/Google e CRUD dos próprios posts).
+- `link-in-bio` (cadastro aberto, página pública `/u/<username>` com links ordenáveis e contagem de cliques).
 
 ## Regras
 
