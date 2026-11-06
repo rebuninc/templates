@@ -1,0 +1,20 @@
+{
+  "name": "Guestbook",
+  "description": "Mural de recados público.",
+  "env": ["REBUN_API_KEY"],
+  "tables": [
+    {
+      "name": "messages",
+      "columns": [
+        { "name": "author", "type": "text", "required": true },
+        { "name": "body", "type": "text", "required": true }
+      ],
+      "access": {
+        "read": "public",
+        "create": "public",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    }
+  ]
+}
