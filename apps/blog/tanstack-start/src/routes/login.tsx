@@ -14,6 +14,8 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { LogoMark } from "@/components/logo"
 import { NightSilk } from "@/components/night-silk"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   getProviders,
   getViewer,
@@ -32,13 +34,6 @@ export const Route = createFileRoute("/login")({
   loader: () => getProviders(),
   component: Login,
 })
-
-const input =
-  "h-12 rounded-full border border-[#2a2a2e] bg-[#1c1c1f] px-5 text-fg outline-none placeholder:text-muted focus:border-muted"
-const pill =
-  "flex h-10 items-center justify-center gap-2 rounded-full px-5 text-sm font-[510] disabled:opacity-50"
-const primary = `${pill} bg-fg text-bg`
-const secondary = `${pill} border border-line text-fg hover:bg-surface`
 
 function Login() {
   const router = useRouter()
@@ -125,7 +120,7 @@ function Login() {
               <p className="text-center text-muted">
                 Enviamos um código para {email}.
               </p>
-              <input
+              <Input
                 name="code"
                 aria-label="Código"
                 placeholder="Código"
@@ -133,11 +128,11 @@ function Login() {
                 autoComplete="one-time-code"
                 required
                 maxLength={6}
-                className={input}
+                variant="pill"
               />
-              <button type="submit" disabled={busy} className={primary}>
+              <Button type="submit" disabled={busy}>
                 Entrar
-              </button>
+              </Button>
             </form>
           ) : step === "otp" ? (
             <form
@@ -153,19 +148,18 @@ function Login() {
                 })
               }}
             >
-              <input
+              <Input
                 name="email"
                 type="email"
                 aria-label="E-mail"
                 placeholder="E-mail"
                 required
-                // biome-ignore lint/a11y/noAutofocus: the field appears right after the user asked for it
                 autoFocus
-                className={input}
+                variant="pill"
               />
-              <button type="submit" disabled={busy} className={primary}>
+              <Button type="submit" disabled={busy}>
                 Enviar código
-              </button>
+              </Button>
               {back}
             </form>
           ) : step === "password" ? (
@@ -188,28 +182,27 @@ function Login() {
                 })
               }}
             >
-              <input
+              <Input
                 name="email"
                 type="email"
                 aria-label="E-mail"
                 placeholder="E-mail"
                 required
-                // biome-ignore lint/a11y/noAutofocus: the field appears right after the user asked for it
                 autoFocus
-                className={input}
+                variant="pill"
               />
-              <input
+              <Input
                 name="password"
                 type="password"
                 aria-label="Senha"
                 placeholder="Senha"
                 autoComplete="current-password"
                 required
-                className={input}
+                variant="pill"
               />
-              <button type="submit" disabled={busy} className={primary}>
+              <Button type="submit" disabled={busy}>
                 Entrar
-              </button>
+              </Button>
               {back}
             </form>
           ) : loadError ? null : providers.length === 0 ? (
@@ -219,44 +212,43 @@ function Login() {
           ) : (
             <>
               {providers.includes("google") ? (
-                <button
+                <Button
                   type="button"
                   disabled={busy}
-                  className={primary}
                   onClick={() => oauth("google")}
                 >
                   <HugeiconsIcon icon={GoogleIcon} size={16} />
                   Entrar com Google
-                </button>
+                </Button>
               ) : null}
               {providers.includes("github") ? (
-                <button
+                <Button
                   type="button"
                   disabled={busy}
-                  className={secondary}
+                  variant="secondary"
                   onClick={() => oauth("github")}
                 >
                   <HugeiconsIcon icon={GithubIcon} size={16} />
                   Entrar com GitHub
-                </button>
+                </Button>
               ) : null}
               {providers.includes("otp") ? (
-                <button
+                <Button
                   type="button"
-                  className={secondary}
+                  variant="secondary"
                   onClick={() => setStep("otp")}
                 >
                   Continuar com e-mail
-                </button>
+                </Button>
               ) : null}
               {providers.includes("password") ? (
-                <button
+                <Button
                   type="button"
-                  className={secondary}
+                  variant="secondary"
                   onClick={() => setStep("password")}
                 >
                   Continuar com senha
-                </button>
+                </Button>
               ) : null}
             </>
           )}

@@ -1,10 +1,9 @@
 import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input, Textarea } from "@/components/ui/input"
 import { savePost } from "@/lib/posts"
 import type { Post } from "@/lib/rebun"
-
-const field =
-  "rounded-lg border border-line bg-surface px-3.5 py-2.5 text-fg outline-none placeholder:text-muted focus:border-muted file:mr-3 file:rounded-full file:border-0 file:bg-fg file:px-3 file:py-1 file:text-sm file:text-bg"
 
 export function PostForm({ post }: { post?: Post }) {
   const router = useRouter()
@@ -31,36 +30,33 @@ export function PostForm({ post }: { post?: Post }) {
       {post ? <input type="hidden" name="id" value={post.id} /> : null}
       <label className="grid gap-2 text-sm font-[510]">
         Título
-        <input
+        <Input
           name="title"
           defaultValue={post?.title}
           required
           maxLength={200}
-          className={field}
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">
         Conteúdo
-        <textarea
+        <Textarea
           name="content"
           defaultValue={post?.content}
           required
           rows={10}
-          className={field}
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">
         Tags
-        <input
+        <Input
           name="tags"
           defaultValue={post?.tags?.join(", ")}
           placeholder="separadas por vírgula"
-          className={field}
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">
         Imagem
-        <input name="image" type="file" accept="image/*" className={field} />
+        <Input name="image" type="file" accept="image/*" />
       </label>
       <label className="flex items-center gap-3 text-sm font-[510]">
         <input
@@ -76,13 +72,9 @@ export function PostForm({ post }: { post?: Post }) {
           {error}
         </p>
       ) : null}
-      <button
-        type="submit"
-        disabled={busy}
-        className="h-10 justify-self-start rounded-full bg-fg px-5 text-sm font-[510] text-bg disabled:opacity-50"
-      >
+      <Button type="submit" disabled={busy} className="justify-self-start">
         Salvar
-      </button>
+      </Button>
     </form>
   )
 }
