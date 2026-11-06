@@ -3,6 +3,7 @@
 ## Relacionadas
 - Altera: [002 — blog](./002-blog.md) — troca a UI com React Bits por um visual sóbrio inspirado no [Linear Now](https://linear.app/now) e remove os efeitos
 - Continuada por: [004 — blog-login-split](./004-blog-login-split.md) — `/login` em duas colunas com shader, sem navbar
+- Alterada por: [011 — blog-theme-toggle](./011-blog-theme-toggle.md) — entra um tema claro, seguindo o sistema, com botão de alternar
 
 ## Objetivo
 Redesenhar a UI do template blog no estilo do Linear Now (escuro, Inter, grid de cards com capa 16:9, artigo centralizado), sem efeitos animados. Dados, rotas e fluxos não mudam.

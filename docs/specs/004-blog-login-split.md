@@ -5,6 +5,7 @@
 - Altera: [002 — blog](./002-blog.md) — o campo de e-mail passa a ficar atrás do botão "Continuar com e-mail"
 - Alterada por: [005 — blog-login-providers](./005-blog-login-providers.md) — botões conforme providers ativos, GitHub, senha e erros em toast
 - Alterada por: [010 — blog-otp-input](./010-blog-otp-input.md) — o campo "Código" vira 6 caixas e envia sozinho
+- Alterada por: [011 — blog-theme-toggle](./011-blog-theme-toggle.md) — o shader do login ganha uma versão clara
 
 ## Objetivo
 Deixar `/login` parecido com o login do Linear (botões grandes em pill, Google em destaque), dividido em duas colunas: à esquerda um texto sobre manchas de shader flutuando, à direita o form.

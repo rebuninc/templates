@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react"
+import { getTheme, subscribeTheme } from "@/lib/theme"
 
 const VERTEX = `attribute vec2 aPosition;
 void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }`
@@ -7,6 +8,7 @@ void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }`
 const FRAGMENT = `precision highp float;
 uniform vec2 uResolution;
 uniform float uTime;
+uniform float uLight;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
@@ -22,11 +24,14 @@ void main() {
   vec3 color = vec3(0.3, 0.29, 0.32) * pattern * (0.25 + 0.75 * dots);
   color *= mix(0.9, 0.6, smoothstep(0.0, 0.7, distance(uv, vec2(0.5))));
   color *= mix(0.5, 1.0, smoothstep(0.0, 0.5, uv.y)) * mix(0.7, 1.0, smoothstep(1.0, 0.5, uv.y));
+  // Light theme: the same folds, inverted onto paper white.
+  color = mix(color, vec3(0.98) - color * 0.5, uLight);
   gl_FragColor = vec4(color, 1.0);
 }`
 
-const VEIL =
-  "linear-gradient(rgb(8 9 10 / .6) 0%, rgb(8 9 10 / .05) 26%, rgb(8 9 10 / .08) 54%, rgb(8 9 10 / .9) 100%), linear-gradient(90deg, rgb(8 9 10 / .35), transparent 55%)"
+const veil = (alpha: number) =>
+  `color-mix(in srgb, var(--color-bg) ${alpha}%, transparent)`
+const VEIL = `linear-gradient(${veil(60)} 0%, ${veil(5)} 26%, ${veil(8)} 54%, ${veil(90)} 100%), linear-gradient(90deg, ${veil(35)}, transparent 55%)`
 
 const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>',
@@ -73,12 +78,14 @@ export function NightSilk({ className = "" }: { className?: string }) {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0)
     const resolution = gl.getUniformLocation(program, "uResolution")
     const time = gl.getUniformLocation(program, "uTime")
+    const light = gl.getUniformLocation(program, "uLight")
 
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches
     const start = performance.now()
     let frame = 0
     const draw = () => {
       gl.uniform1f(time, still ? 4 : (performance.now() - start) / 1000)
+      gl.uniform1f(light, getTheme() === "light" ? 1 : 0)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
       canvas.dataset.ready = ""
     }
@@ -96,11 +103,14 @@ export function NightSilk({ className = "" }: { className?: string }) {
       draw()
     })
     resize.observe(canvas)
+    // Redraw at once so the theme transition captures the new silk.
+    const unsubscribe = subscribeTheme(draw)
     if (!still) frame = requestAnimationFrame(loop)
 
     return () => {
       cancelAnimationFrame(frame)
       resize.disconnect()
+      unsubscribe()
       gl.deleteBuffer(buffer)
       gl.deleteProgram(program)
       gl.deleteShader(vertex)

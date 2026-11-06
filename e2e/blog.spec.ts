@@ -495,8 +495,58 @@ for (const reduce of [false, true]) {
       if (reduce) expect(seen).toEqual([])
       else expect(seen.length).toBeGreaterThan(0)
     })
+
+    test("animates the theme toggle", async ({ page }) => {
+      type Counted = { __transitions: number }
+      await page.addInitScript(() => {
+        const counted = window as unknown as Counted
+        counted.__transitions = 0
+        const start = document.startViewTransition.bind(document)
+        document.startViewTransition = (update) => {
+          counted.__transitions++
+          return start(update)
+        }
+      })
+      await open(page, "/")
+      await page.getByRole("button", { name: /^Ativar tema/ }).click()
+      const count = await page.evaluate(
+        () => (window as unknown as Counted).__transitions,
+      )
+      expect(count).toBe(reduce ? 0 : 1)
+    })
   })
 }
+
+test.describe("theme", () => {
+  const html = (page: Page) => page.locator("html")
+
+  for (const scheme of ["light", "dark"] as const) {
+    test(`follows the ${scheme} system theme`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme })
+      await page.goto("/", { waitUntil: "domcontentloaded" })
+      await expect(html(page)).toHaveAttribute("data-theme", scheme)
+    })
+  }
+
+  test("toggles and keeps the chosen theme", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" })
+    await open(page, "/")
+    await page.getByRole("button", { name: "Ativar tema claro" }).click()
+    await expect(html(page)).toHaveAttribute("data-theme", "light")
+    await expect(
+      page.getByRole("button", { name: "Ativar tema escuro" }),
+    ).toBeVisible()
+    await page.reload()
+    await expect(html(page)).toHaveAttribute("data-theme", "light")
+  })
+
+  test("toggles the theme on the login page", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" })
+    await open(page, "/login")
+    await page.getByRole("button", { name: "Ativar tema escuro" }).click()
+    await expect(html(page)).toHaveAttribute("data-theme", "dark")
+  })
+})
 
 test("serves the favicon", async ({ page, request }) => {
   await open(page, "/")
