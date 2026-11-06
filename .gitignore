@@ -6,3 +6,6 @@ next-env.d.ts
 .vercel
 .DS_Store
 *.tsbuildinfo
+.output
+.nitro
+.tanstack

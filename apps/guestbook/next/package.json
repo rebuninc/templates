@@ -1,6 +1,6 @@
 {
-  "name": "guestbook",
-  "description": "Mural de recados público com Rebun e Next.js.",
+  "name": "guestbook-next",
+  "description": "Guestbook (Next.js)",
   "private": true,
   "scripts": {
     "dev": "next dev",

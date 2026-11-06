@@ -2,7 +2,7 @@
   "name": "rebun-templates",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*/*"
   ],
   "scripts": {
     "dev": "bun --filter '*' dev",
