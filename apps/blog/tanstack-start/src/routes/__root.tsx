@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react"
 import { Toaster } from "sonner"
 import { LogoMark } from "@/components/logo"
+import { NavigationProgress } from "@/components/navigation-progress"
 import { getViewer, signOut } from "@/lib/posts"
 import { APP_NAME } from "@/lib/utils"
 import styles from "@/styles.css?url"
@@ -62,6 +63,7 @@ function Root() {
         <HeadContent />
       </head>
       <body className="min-h-dvh bg-bg font-sans text-fg antialiased">
+        <NavigationProgress />
         <header
           data-scrolled={scrolled || undefined}
           className="group sticky top-0 z-20 border-b border-transparent bg-bg/80 backdrop-blur-md transition-colors data-scrolled:border-line"

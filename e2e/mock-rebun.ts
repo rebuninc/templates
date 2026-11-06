@@ -12,6 +12,7 @@ type State = {
   deletes: { table: string; id: string }[]
   uploads: string[]
   removedFiles: string[]
+  delay: number
 }
 
 const empty = (): State => ({
@@ -25,6 +26,7 @@ const empty = (): State => ({
   deletes: [],
   uploads: [],
   removedFiles: [],
+  delay: 0,
 })
 let state = empty()
 
@@ -190,6 +192,7 @@ Bun.serve({
       state = { ...empty(), ...next }
       return new Response(null, { status: 204 })
     }
+    if (state.delay) await Bun.sleep(state.delay)
     if (pathname === "/v1/project/me") {
       if (state.projectFail)
         return Response.json({ error: state.projectFail }, { status: 500 })

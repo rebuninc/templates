@@ -108,6 +108,17 @@ test("shows a published post", async ({ page }) => {
   })
 })
 
+test("shows the progress bar while a route loads", async ({ page }) => {
+  await open(page, "/")
+  const state = await mock()
+  await setMock({ ...state, delay: 800 })
+  await page.getByRole("link", { name: "Segundo" }).click()
+  const bar = page.locator("[data-navigation-progress]")
+  await expect(bar).toBeAttached()
+  await expect(page).toHaveURL(/\/posts\/post-2$/)
+  await expect(bar).not.toBeAttached()
+})
+
 test("hides a draft from visitors", async ({ page }) => {
   await open(page, "/posts/post-3")
   await expect(
