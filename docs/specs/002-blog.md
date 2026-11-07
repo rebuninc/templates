@@ -6,6 +6,7 @@
 - Alterada por: [004 — blog-login-split](./004-blog-login-split.md) — e-mail atrás do botão "Continuar com e-mail"
 - Alterada por: [013 — blog-empty-state](./013-blog-empty-state.md) — `/` e `/admin` sem posts mostram um empty state
 - Alterada por: [014 — input-placeholders](./014-input-placeholders.md) — título e conteúdo do post ganham placeholder
+- Alterada por: [015 — blog-checkbox](./015-blog-checkbox.md) — "Publicado" usa o `Checkbox` do core
 
 ## Objetivo
 Novo template `apps/blog` (só TanStack Start por enquanto): blog público com lista e detalhe de posts publicados, login por OTP ou Google (sem cadastro) e CRUD dos próprios posts para quem está logado.

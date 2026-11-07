@@ -374,7 +374,7 @@ test("creates a post with a trimmed title, tags and image", async ({
     mimeType: "image/png",
     buffer: Buffer.from("png"),
   })
-  await page.getByLabel("Publicado").check()
+  await page.getByRole("checkbox", { name: "Publicado" }).check()
   await page.getByRole("button", { name: "Salvar" }).click()
 
   await expect(page).toHaveURL(/\/admin$/)
@@ -413,6 +413,7 @@ test("edits a post without changing its slug", async ({ page }) => {
   await login(page)
   await card(page, "Primeiro").getByRole("link", { name: "Editar" }).click()
   await page.waitForLoadState("networkidle")
+  await expect(page.getByRole("checkbox", { name: "Publicado" })).toBeChecked()
   await page.getByLabel("Título").fill("Primeiro editado")
   await page.getByRole("button", { name: "Salvar" }).click()
 

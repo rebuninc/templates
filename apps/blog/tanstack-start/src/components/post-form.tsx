@@ -1,6 +1,7 @@
 import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input, Textarea } from "@/components/ui/input"
 import { savePost } from "@/lib/posts"
 import type { Post } from "@/lib/rebun"
@@ -61,11 +62,9 @@ export function PostForm({ post }: { post?: Post }) {
         <Input name="image" type="file" accept="image/*" />
       </label>
       <label className="flex items-center gap-3 text-sm font-[510]">
-        <input
+        <Checkbox
           name="published"
-          type="checkbox"
           defaultChecked={post?.published === "true"}
-          className="size-4 accent-fg"
         />
         Publicado
       </label>
