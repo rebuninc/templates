@@ -392,3 +392,29 @@ for (const reduce of [false, true]) {
     else expect(seen.length).toBeGreaterThan(0)
   })
 }
+
+test("shows a spinner on the submit button while it runs", async ({ page }) => {
+  await login(page)
+  const form = page.getByRole("form", { name: "Novo link" })
+  await form.getByLabel("Título").fill("Loja")
+  await form.getByLabel("URL").fill("exemplo.com")
+  const button = form.getByRole("button", { name: "Adicionar" })
+  const before = await button.boundingBox()
+  const state = await mock()
+  await setMock({ ...state, delay: 800 })
+  await button.click()
+  await expect(button).toHaveAttribute("aria-busy", "true")
+  await expect(button).toBeDisabled()
+  await expect(button.locator("[data-spinner]")).toBeVisible()
+  const during = await button.boundingBox()
+  // Only the size: the page may still be animating in.
+  expect([during?.width, during?.height]).toEqual([
+    before?.width,
+    before?.height,
+  ])
+  // Each mock call waits 800ms and adding a link makes several.
+  await expect(row(page, "Loja")).toBeVisible({ timeout: 15_000 })
+  await expect(button).not.toHaveAttribute("aria-busy")
+  await expect(button).toBeEnabled()
+  await expect(button.locator("[data-spinner]")).toHaveCount(0)
+})

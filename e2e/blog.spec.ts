@@ -642,3 +642,28 @@ for (const reduce of [false, true]) {
     else expect(seen.length).toBeGreaterThan(0)
   })
 }
+
+test("shows a spinner on the submit button while it runs", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com senha" }).click()
+  await page.getByPlaceholder("E-mail").fill(user.email)
+  await page.getByPlaceholder("Senha").fill("errada")
+  const button = page.getByRole("button", { name: "Entrar", exact: true })
+  const before = await button.boundingBox()
+  const state = await mock()
+  await setMock({ ...state, delay: 800 })
+  await button.click()
+  await expect(button).toHaveAttribute("aria-busy", "true")
+  await expect(button).toBeDisabled()
+  await expect(button.locator("[data-spinner]")).toBeVisible()
+  const during = await button.boundingBox()
+  // Only the size: the page may still be animating in.
+  expect([during?.width, during?.height]).toEqual([
+    before?.width,
+    before?.height,
+  ])
+  await expect(toast(page)).toHaveText("Erro ao entrar: INVALID_CREDENTIALS")
+  await expect(button).not.toHaveAttribute("aria-busy")
+  await expect(button).toBeEnabled()
+  await expect(button.locator("[data-spinner]")).toHaveCount(0)
+})

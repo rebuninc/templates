@@ -66,7 +66,7 @@ export function LinkForm({ link }: { link?: LinkRow }) {
       </label>
       <Button
         type="submit"
-        disabled={busy}
+        loading={busy}
         className="self-end justify-self-start"
       >
         {link ? "Salvar" : "Adicionar"}

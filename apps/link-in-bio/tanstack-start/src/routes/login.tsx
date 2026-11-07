@@ -168,7 +168,7 @@ function Login() {
                       digitColor="var(--color-bg)"
                       className="justify-self-center"
                     />
-                    <Button type="submit" disabled={busy}>
+                    <Button type="submit" loading={busy}>
                       {submitLabel}
                     </Button>
                   </form>
@@ -197,7 +197,7 @@ function Login() {
                       autoFocus
                       variant="pill"
                     />
-                    <Button type="submit" disabled={busy}>
+                    <Button type="submit" loading={busy}>
                       Enviar código
                     </Button>
                     {back}
@@ -248,7 +248,7 @@ function Login() {
                       required
                       variant="pill"
                     />
-                    <Button type="submit" disabled={busy}>
+                    <Button type="submit" loading={busy}>
                       {submitLabel}
                     </Button>
                     {back}

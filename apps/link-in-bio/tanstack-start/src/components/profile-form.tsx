@@ -102,7 +102,7 @@ export function ProfileForm({ profile }: { profile?: ProfileView }) {
           {error}
         </p>
       ) : null}
-      <Button type="submit" disabled={busy} className="justify-self-start">
+      <Button type="submit" loading={busy} className="justify-self-start">
         Salvar
       </Button>
     </form>
