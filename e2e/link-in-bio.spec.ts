@@ -112,6 +112,18 @@ test("sends a user without a profile to the setup", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/setup$/)
 })
 
+test("shows placeholders in the profile form", async ({ page }) => {
+  await login(page, bia)
+  await expect(page.getByLabel("Nome")).toHaveAttribute(
+    "placeholder",
+    "Digite seu nome",
+  )
+  await expect(page.getByLabel("Bio")).toHaveAttribute(
+    "placeholder",
+    "Digite sua bio",
+  )
+})
+
 test("creates the profile with a normalized username", async ({ page }) => {
   await login(page, bia)
   await page.getByLabel("Username").fill("  Bia.R  ")
@@ -212,6 +224,15 @@ test("shows the links with their clicks", async ({ page }) => {
   await expect(
     row(page, "Blog").getByRole("button", { name: "Mover para baixo" }),
   ).toBeDisabled()
+})
+
+test("shows a placeholder in the link form", async ({ page }) => {
+  await login(page)
+  const form = page.getByRole("form", { name: "Novo link" })
+  await expect(form.getByLabel("Título")).toHaveAttribute(
+    "placeholder",
+    "Digite o título",
+  )
 })
 
 test("adds a link with https and the next position", async ({ page }) => {

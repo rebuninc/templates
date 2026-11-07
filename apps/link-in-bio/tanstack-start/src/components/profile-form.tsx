@@ -55,6 +55,7 @@ export function ProfileForm({ profile }: { profile?: ProfileView }) {
           defaultValue={profile?.name}
           required
           maxLength={80}
+          placeholder="Digite seu nome"
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">
@@ -64,6 +65,7 @@ export function ProfileForm({ profile }: { profile?: ProfileView }) {
           defaultValue={profile?.bio ?? ""}
           maxLength={160}
           rows={3}
+          placeholder="Digite sua bio"
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">

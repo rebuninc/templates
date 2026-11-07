@@ -35,6 +35,7 @@ export function PostForm({ post }: { post?: Post }) {
           defaultValue={post?.title}
           required
           maxLength={200}
+          placeholder="Digite o título"
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">
@@ -44,6 +45,7 @@ export function PostForm({ post }: { post?: Post }) {
           defaultValue={post?.content}
           required
           rows={10}
+          placeholder="Digite o conteúdo"
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">

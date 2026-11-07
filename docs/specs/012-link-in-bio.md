@@ -1,5 +1,8 @@
 # Spec: link-in-bio
 
+## Relacionadas
+- Alterada por: [014 — input-placeholders](./014-input-placeholders.md) — título do link, nome e bio do perfil ganham placeholder
+
 ## Objetivo
 Novo template `apps/link-in-bio` (TanStack Start): qualquer pessoa cria conta, monta uma página pública `/u/$username` com avatar, nome, bio, cor e uma lista ordenável de links, e vê no `/admin` quantos cliques cada link recebeu.
 

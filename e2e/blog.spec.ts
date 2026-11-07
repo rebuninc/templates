@@ -347,6 +347,19 @@ test("sends visitors from /admin to /login", async ({ page }) => {
   await expect(page).toHaveURL(/\/login$/)
 })
 
+test("shows placeholders in the post form", async ({ page }) => {
+  await login(page)
+  await page.getByRole("link", { name: "Novo post" }).click()
+  await expect(page.getByLabel("Título")).toHaveAttribute(
+    "placeholder",
+    "Digite o título",
+  )
+  await expect(page.getByLabel("Conteúdo")).toHaveAttribute(
+    "placeholder",
+    "Digite o conteúdo",
+  )
+})
+
 test("creates a post with a trimmed title, tags and image", async ({
   page,
 }) => {

@@ -51,6 +51,7 @@ export function LinkForm({ link }: { link?: LinkRow }) {
           defaultValue={link?.title}
           required
           maxLength={80}
+          placeholder="Digite o título"
         />
       </label>
       <label className="grid gap-2 text-sm font-[510]">
