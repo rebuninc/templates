@@ -96,6 +96,7 @@ export const saveProfile = createServerFn({ method: "POST" })
       bio: String(form.get("bio") ?? "").trim(),
       color: colorOf(String(form.get("color") ?? "")),
       avatar: avatar instanceof File && avatar.size > 0 ? avatar : null,
+      removeAvatar: form.get("avatar-remove") === "on",
     }
   })
   .handler(async ({ data }) => {
@@ -108,7 +109,7 @@ export const saveProfile = createServerFn({ method: "POST" })
     if (current.error) throw new Error(current.error)
 
     const bucket = client.storage.bucket(BUCKET)
-    let avatar = current.profile?.avatar ?? null
+    let avatar = data.removeAvatar ? null : (current.profile?.avatar ?? null)
     if (data.avatar) {
       const path = `${crypto.randomUUID()}-${data.avatar.name}`
       const uploaded = await bucket.upload(path, data.avatar)

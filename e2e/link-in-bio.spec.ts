@@ -134,6 +134,9 @@ test("creates the profile with a normalized username", async ({ page }) => {
     mimeType: "image/png",
     buffer: Buffer.from("png"),
   })
+  await expect(
+    page.getByRole("button", { name: "Remover eu.png" }),
+  ).toBeVisible()
   await page.getByText("Verde").click()
   await page.getByRole("button", { name: "Salvar" }).click()
 
@@ -316,6 +319,35 @@ test("replaces the avatar and deletes the old one", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin$/)
   const { patches, removedFiles, uploads } = await mock()
   expect(patches[0].values.avatar).toBe(uploads[0])
+  expect(removedFiles).toEqual(["ana.png"])
+})
+
+test("refuses an avatar that is not an image", async ({ page }) => {
+  await login(page, bia)
+  await page.getByLabel("Avatar").setInputFiles({
+    name: "nota.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("oi"),
+  })
+  await expect(page.getByRole("alert")).toHaveText(
+    "nota.txt não é um tipo aceito",
+  )
+  await expect(
+    page.getByRole("button", { name: "Remover nota.txt" }),
+  ).toHaveCount(0)
+})
+
+test("removes the current avatar and deletes it from storage", async ({
+  page,
+}) => {
+  await login(page)
+  await page.getByRole("link", { name: "Editar perfil" }).click()
+  await page.getByRole("button", { name: "Remover ana.png" }).click()
+  await page.getByRole("button", { name: "Salvar" }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  const { patches, removedFiles, uploads } = await mock()
+  expect(uploads).toEqual([])
+  expect(patches[0].values.avatar).toBeNull()
   expect(removedFiles).toEqual(["ana.png"])
 })
 

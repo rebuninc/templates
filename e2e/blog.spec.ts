@@ -80,6 +80,21 @@ async function login(page: Page) {
   await page.waitForLoadState("networkidle")
 }
 
+// Playwright has no file drop, so dispatch one with a real DataTransfer.
+async function dropFile(page: Page, name: string, type: string) {
+  const transfer = await page.evaluateHandle(
+    ([name, type]) => {
+      const data = new DataTransfer()
+      data.items.add(new File(["png"], name, { type }))
+      return data
+    },
+    [name, type],
+  )
+  await page
+    .getByText("Arraste ou clique para escolher")
+    .dispatchEvent("drop", { dataTransfer: transfer })
+}
+
 const card = (page: Page, title: string) =>
   page.getByRole("listitem").filter({ hasText: title })
 
@@ -369,11 +384,10 @@ test("creates a post with a trimmed title, tags and image", async ({
   await page.getByLabel("Título").fill("  Olá Mundo  ")
   await page.getByLabel("Conteúdo").fill("  Texto  ")
   await page.getByLabel("Tags").fill(" a, ,b ")
-  await page.getByLabel("Imagem").setInputFiles({
-    name: "capa.png",
-    mimeType: "image/png",
-    buffer: Buffer.from("png"),
-  })
+  await dropFile(page, "capa.png", "image/png")
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "capa.png" }),
+  ).toContainText("3 B")
   await page.getByRole("checkbox", { name: "Publicado" }).check()
   await page.getByRole("button", { name: "Salvar" }).click()
 
@@ -424,6 +438,71 @@ test("edits a post without changing its slug", async ({ page }) => {
   expect(patches[0].id).toBe("1")
   expect(patches[0].values.title).toBe("Primeiro editado")
   expect(patches[0].values).not.toHaveProperty("slug")
+})
+
+test("refuses an image larger than 5 MB", async ({ page }) => {
+  await login(page)
+  await page.getByRole("link", { name: "Novo post" }).click()
+  await page.waitForLoadState("networkidle")
+  await page.getByLabel("Imagem").setInputFiles({
+    name: "grande.png",
+    mimeType: "image/png",
+    buffer: Buffer.alloc(5 * 1024 * 1024 + 1),
+  })
+  await expect(page.getByRole("alert")).toHaveText(
+    "grande.png é maior que 5 MB",
+  )
+  await expect(
+    page.getByRole("button", { name: "Remover grande.png" }),
+  ).toHaveCount(0)
+})
+
+test("removes a chosen image before saving", async ({ page }) => {
+  await login(page)
+  await page.getByRole("link", { name: "Novo post" }).click()
+  await page.waitForLoadState("networkidle")
+  await page.getByLabel("Título").fill("Sem capa")
+  await page.getByLabel("Conteúdo").fill("Texto")
+  await dropFile(page, "capa.png", "image/png")
+  await page.getByRole("button", { name: "Remover capa.png" }).click()
+  await expect(
+    page.getByRole("button", { name: "Remover capa.png" }),
+  ).toHaveCount(0)
+  await page.getByRole("button", { name: "Salvar" }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  const { posts, uploads } = await mock()
+  expect(uploads).toEqual([])
+  expect(posts[0].values.image).toBeNull()
+})
+
+test("keeps the current image when editing without touching it", async ({
+  page,
+}) => {
+  await login(page)
+  await card(page, "Segundo").getByRole("link", { name: "Editar" }).click()
+  await page.waitForLoadState("networkidle")
+  await expect(
+    page.getByRole("button", { name: "Remover x.png" }),
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Salvar" }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  const { patches, removedFiles } = await mock()
+  expect(patches[0].values.image).toBe("x.png")
+  expect(removedFiles).toEqual([])
+})
+
+test("removes the current image and deletes it from storage", async ({
+  page,
+}) => {
+  await login(page)
+  await card(page, "Segundo").getByRole("link", { name: "Editar" }).click()
+  await page.waitForLoadState("networkidle")
+  await page.getByRole("button", { name: "Remover x.png" }).click()
+  await page.getByRole("button", { name: "Salvar" }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  const { patches, removedFiles } = await mock()
+  expect(patches[0].values.image).toBeNull()
+  expect(removedFiles).toEqual(["x.png"])
 })
 
 test("deletes a post and its image", async ({ page }) => {

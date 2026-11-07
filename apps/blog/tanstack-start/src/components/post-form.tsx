@@ -2,11 +2,11 @@ import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FileUpload, fileName } from "@/components/ui/file-upload"
 import { Input, Textarea } from "@/components/ui/input"
-import { savePost } from "@/lib/posts"
-import type { Post } from "@/lib/rebun"
+import { type PostView, savePost } from "@/lib/posts"
 
-export function PostForm({ post }: { post?: Post }) {
+export function PostForm({ post }: { post?: PostView | null }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -57,10 +57,17 @@ export function PostForm({ post }: { post?: Post }) {
           placeholder="separadas por vírgula"
         />
       </label>
-      <label className="grid gap-2 text-sm font-[510]">
-        Imagem
-        <Input name="image" type="file" accept="image/*" />
-      </label>
+      <FileUpload
+        label="Imagem"
+        name="image"
+        accept="image/*"
+        maxSize={5 * 1024 * 1024}
+        current={
+          post?.image
+            ? { name: fileName(post.image), url: post.imageUrl }
+            : null
+        }
+      />
       <label className="flex items-center gap-3 text-sm font-[510]">
         <Checkbox
           name="published"

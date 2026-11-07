@@ -7,6 +7,7 @@
 - Alterada por: [013 — blog-empty-state](./013-blog-empty-state.md) — `/` e `/admin` sem posts mostram um empty state
 - Alterada por: [014 — input-placeholders](./014-input-placeholders.md) — título e conteúdo do post ganham placeholder
 - Alterada por: [015 — blog-checkbox](./015-blog-checkbox.md) — "Publicado" usa o `Checkbox` do core
+- Alterada por: [018 — file-upload](./018-file-upload.md) — o campo "Imagem" vira o `FileUpload`, e na edição a imagem atual pode ser removida
 
 ## Objetivo
 Novo template `apps/blog` (só TanStack Start por enquanto): blog público com lista e detalhe de posts publicados, login por OTP ou Google (sem cadastro) e CRUD dos próprios posts para quem está logado.

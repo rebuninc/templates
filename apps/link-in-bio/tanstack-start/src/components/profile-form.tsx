@@ -1,6 +1,7 @@
 import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { FileUpload, fileName } from "@/components/ui/file-upload"
 import { Input, Textarea } from "@/components/ui/input"
 import {
   COLOR_LABELS,
@@ -68,10 +69,17 @@ export function ProfileForm({ profile }: { profile?: ProfileView }) {
           placeholder="Digite sua bio"
         />
       </label>
-      <label className="grid gap-2 text-sm font-[510]">
-        Avatar
-        <Input name="avatar" type="file" accept="image/*" />
-      </label>
+      <FileUpload
+        label="Avatar"
+        name="avatar"
+        accept="image/*"
+        maxSize={2 * 1024 * 1024}
+        current={
+          profile?.avatar
+            ? { name: fileName(profile.avatar), url: profile.avatarUrl }
+            : null
+        }
+      />
       <fieldset className="grid gap-2 text-sm font-[510]">
         <legend className="mb-2">Cor</legend>
         <div className="flex flex-wrap gap-2">

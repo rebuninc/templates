@@ -117,7 +117,7 @@ export const getMine = createServerFn()
     const client = rebun()
     const user = await requireViewer(client)
     const { data } = await client.db.from("posts").get(id)
-    return data && data.owner_id === user.id ? data : null
+    return data && data.owner_id === user.id ? withImage(client, data) : null
   })
 
 export const savePost = createServerFn({ method: "POST" })
@@ -130,6 +130,7 @@ export const savePost = createServerFn({ method: "POST" })
       tags: parseTags(String(form.get("tags") ?? "")),
       published: form.get("published") === "on",
       image: image instanceof File && image.size > 0 ? image : null,
+      removeImage: form.get("image-remove") === "on",
     }
   })
   .handler(async ({ data }) => {
@@ -140,7 +141,7 @@ export const savePost = createServerFn({ method: "POST" })
     const current = data.id ? await client.db.from("posts").get(data.id) : null
     if (current?.error) throw fail(current.error)
 
-    let image = current?.data.image ?? null
+    let image = data.removeImage ? null : (current?.data.image ?? null)
     if (data.image) {
       const path = `${crypto.randomUUID()}-${data.image.name}`
       const uploaded = await client.storage
