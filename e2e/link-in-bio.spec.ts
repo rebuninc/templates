@@ -357,3 +357,38 @@ test("signs out", async ({ page }) => {
   await open(page, "/admin")
   await expect(page).toHaveURL(/\/login$/)
 })
+
+// Records every non-none transform on the matching elements, frame by frame.
+async function watchTransforms(page: Page, selector: string) {
+  type Seen = { __transforms: string[] }
+  await page.evaluate((sel) => {
+    const seen: string[] = []
+    ;(window as unknown as Seen).__transforms = seen
+    const tick = () => {
+      for (const el of document.querySelectorAll(sel)) {
+        const transform = getComputedStyle(el).transform
+        if (transform !== "none") seen.push(transform)
+      }
+      requestAnimationFrame(tick)
+    }
+    tick()
+  }, selector)
+  return () => page.evaluate(() => (window as unknown as Seen).__transforms)
+}
+
+for (const reduce of [false, true]) {
+  test(`slides the login mode pill${reduce ? " with reduced motion" : ""}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({
+      reducedMotion: reduce ? "reduce" : "no-preference",
+    })
+    await open(page, "/login")
+    const transforms = await watchTransforms(page, "[data-mode-pill]")
+    await page.getByRole("radio", { name: "Criar conta" }).check()
+    await page.waitForTimeout(500)
+    const seen = await transforms()
+    if (reduce) expect(seen).toEqual([])
+    else expect(seen.length).toBeGreaterThan(0)
+  })
+}

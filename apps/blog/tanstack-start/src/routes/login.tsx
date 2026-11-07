@@ -10,7 +10,7 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router"
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { LogoMark } from "@/components/logo"
@@ -46,6 +46,7 @@ function Login() {
   const { providers, signUp, error: loadError } = Route.useLoaderData()
   const [step, setStep] = useState<"options" | "otp" | "password">("options")
   const [mode, setMode] = useState<"login" | "signup">("login")
+  const reduceMotion = useReducedMotion()
   const joining = mode === "signup"
   const submitLabel = joining ? "Criar conta" : "Entrar"
   const [email, setEmail] = useState<string | null>(null)
@@ -266,8 +267,18 @@ function Login() {
                         {(["login", "signup"] as const).map((value) => (
                           <label
                             key={value}
-                            className="relative rounded-full py-1.5 text-center text-muted transition-colors has-checked:bg-surface has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-muted"
+                            className="relative rounded-full py-1.5 text-center text-muted transition-colors has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-muted"
                           >
+                            {mode === value ? (
+                              <motion.span
+                                layoutId={
+                                  reduceMotion ? undefined : "mode-pill"
+                                }
+                                data-mode-pill
+                                transition={spring}
+                                className="absolute inset-0 rounded-full bg-surface"
+                              />
+                            ) : null}
                             <input
                               type="radio"
                               name="mode"
@@ -275,7 +286,9 @@ function Login() {
                               checked={mode === value}
                               onChange={() => setMode(value)}
                             />
-                            {value === "login" ? "Entrar" : "Criar conta"}
+                            <span className="pointer-events-none relative">
+                              {value === "login" ? "Entrar" : "Criar conta"}
+                            </span>
                           </label>
                         ))}
                       </div>

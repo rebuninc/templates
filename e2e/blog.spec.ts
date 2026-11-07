@@ -624,3 +624,21 @@ test("serves the favicon", async ({ page, request }) => {
     expect(res.status()).toBe(200)
   }
 })
+
+for (const reduce of [false, true]) {
+  test(`slides the login mode pill${reduce ? " with reduced motion" : ""}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({
+      reducedMotion: reduce ? "reduce" : "no-preference",
+    })
+    await setMock(signUpKey)
+    await open(page, "/login")
+    const transforms = await watchTransforms(page, "[data-mode-pill]")
+    await page.getByRole("radio", { name: "Criar conta" }).check()
+    await page.waitForTimeout(500)
+    const seen = await transforms()
+    if (reduce) expect(seen).toEqual([])
+    else expect(seen.length).toBeGreaterThan(0)
+  })
+}

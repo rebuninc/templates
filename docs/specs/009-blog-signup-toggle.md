@@ -2,6 +2,7 @@
 
 ## Relacionadas
 - Altera: [005 — blog-login-providers](./005-blog-login-providers.md) — `/login` ganha o modo "Criar conta" quando a chave tem `auth:signup`
+- Alterada por: [016 — login-mode-pill-motion](./016-login-mode-pill-motion.md) — o fundo da pill desliza na troca
 
 ## Objetivo
 Atualizar o `rebun-sdk` para 0.5.3 e usar as `permissions` de `project.me()` para mostrar, acima das opções de `/login`, uma pill "Entrar | Criar conta" quando a chave tem `auth:signup`. No modo "Criar conta" os fluxos são os mesmos; só mudam os textos, e a senha usa `signUp`/`verifySignUp`.

@@ -2,6 +2,7 @@
 
 ## Relacionadas
 - Alterada por: [014 — input-placeholders](./014-input-placeholders.md) — título do link, nome e bio do perfil ganham placeholder
+- Alterada por: [016 — login-mode-pill-motion](./016-login-mode-pill-motion.md) — o fundo da pill do `/login` desliza na troca
 
 ## Objetivo
 Novo template `apps/link-in-bio` (TanStack Start): qualquer pessoa cria conta, monta uma página pública `/u/$username` com avatar, nome, bio, cor e uma lista ordenável de links, e vê no `/admin` quantos cliques cada link recebeu.
