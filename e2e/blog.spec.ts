@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test"
+import { expect, type Locator, type Page, test } from "@playwright/test"
 
 type State = {
   posts: { table: string; values: Record<string, unknown> }[]
@@ -745,4 +745,31 @@ test("shows a spinner on the submit button while it runs", async ({ page }) => {
   await expect(button).not.toHaveAttribute("aria-busy")
   await expect(button).toBeEnabled()
   await expect(button.locator("[data-spinner]")).toHaveCount(0)
+})
+
+// Focus ring is box-shadow; 2px border matches the Checkbox.
+async function expectCheckboxBase(field: Locator, radius?: string) {
+  await field.focus()
+  await expect(field).toHaveCSS("border-top-width", "2px")
+  if (radius) await expect(field).toHaveCSS("border-top-left-radius", radius)
+  await expect(field).not.toHaveCSS("box-shadow", "none")
+}
+
+test("gives the inputs the checkbox base", async ({ page }) => {
+  await open(page, "/login")
+  await page.getByRole("button", { name: "Continuar com e-mail" }).click()
+  await expectCheckboxBase(page.getByPlaceholder("E-mail"))
+  for (const el of [
+    page.getByPlaceholder("E-mail"),
+    page.getByRole("button", { name: "Enviar código" }),
+  ])
+    await expect(el).toHaveCSS("height", "48px")
+  await login(page)
+  await page.getByRole("link", { name: "Novo post" }).click()
+  await page.waitForLoadState("networkidle")
+  await expectCheckboxBase(page.getByLabel("Título"), "6px")
+  await expect(page.getByRole("checkbox", { name: "Publicado" })).toHaveCSS(
+    "border-top-left-radius",
+    "6px",
+  )
 })

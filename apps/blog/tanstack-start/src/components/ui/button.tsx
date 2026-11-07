@@ -22,7 +22,7 @@ export function Button({
       {...props}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={`press relative flex h-10 items-center justify-center gap-2 rounded-full px-5 text-sm font-[510] disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`press relative flex h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-[510] disabled:opacity-50 ${variants[variant]} ${className}`}
     >
       <span
         className={`flex items-center justify-center gap-2 ${loading ? "opacity-0" : ""}`}

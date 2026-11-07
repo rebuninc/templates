@@ -8,7 +8,7 @@ export function Checkbox({
 }: CheckboxPrimitive.Root.Props) {
   return (
     <CheckboxPrimitive.Root
-      className={`group flex size-5 shrink-0 items-center justify-center rounded-md border-2 border-fg/20 outline-none transition-[background-color,border-color,box-shadow,scale] duration-500 ease-[cubic-bezier(0.34,1.8,0.64,1)] active:scale-75 focus-visible:ring-4 focus-visible:ring-muted/50 data-checked:border-fg data-checked:bg-fg data-checked:text-bg data-checked:ring-[6px] data-checked:ring-fg/10 data-disabled:cursor-not-allowed data-disabled:opacity-40 motion-reduce:transition-none ${className}`}
+      className={`group flex size-5 shrink-0 items-center justify-center rounded-field border-2 border-fg/20 outline-none transition-[background-color,border-color,box-shadow,scale] duration-500 ease-[cubic-bezier(0.34,1.8,0.64,1)] active:scale-75 focus-visible:ring-4 focus-visible:ring-muted/50 data-checked:border-fg data-checked:bg-fg data-checked:text-bg data-checked:ring-[6px] data-checked:ring-fg/10 data-disabled:cursor-not-allowed data-disabled:opacity-40 motion-reduce:transition-none ${className}`}
       {...props}
     >
       <CheckboxPrimitive.Indicator keepMounted>

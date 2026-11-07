@@ -2,6 +2,7 @@
 
 ## Relacionadas
 - Altera: [002 — blog](./002-blog.md) — o checkbox "Publicado" usa o `Checkbox` do core
+- Continuada por: [019 — input-checkbox-base](./019-input-checkbox-base.md) — inputs adotam a base do checkbox; raio vira a token `--radius-field`
 
 ## Objetivo
 Trazer o `Checkbox` do core (`apps/web/src/components/ui/checkbox.tsx`, Base UI + ícone com animação de mola) para o blog e usá-lo no "Publicado" do form de post, no lugar do `<input type="checkbox">` nativo.
