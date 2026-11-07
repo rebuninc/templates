@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, getRouteApi } from "@tanstack/react-router"
 import { Pagination } from "@/components/pagination"
-import { PostList } from "@/components/post-list"
+import { NoPosts, PostList } from "@/components/post-list"
 import { listPublished, parsePage } from "@/lib/posts"
 
 export const Route = createFileRoute("/")({
@@ -13,8 +13,11 @@ export const Route = createFileRoute("/")({
   component: Home,
 })
 
+const root = getRouteApi("__root__")
+
 function Home() {
   const { posts, pages, error } = Route.useLoaderData()
+  const viewer = root.useLoaderData()
   const { page = 1 } = Route.useSearch()
 
   return (
@@ -26,6 +29,8 @@ function Home() {
         <p role="alert" className="animate-alert-in text-red-400">
           Erro ao carregar: {error}
         </p>
+      ) : posts.length === 0 ? (
+        <NoPosts canWrite={Boolean(viewer)} />
       ) : (
         <>
           <PostList posts={posts} />

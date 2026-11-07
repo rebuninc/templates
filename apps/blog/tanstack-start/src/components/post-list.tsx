@@ -1,6 +1,8 @@
+import { News01Icon } from "@hugeicons/core-free-icons"
 import { Link } from "@tanstack/react-router"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type { ReactNode } from "react"
+import { EmptyState } from "@/components/empty-state"
 import { enter, spring, useEnterFrom } from "@/lib/motion"
 import type { PostView } from "@/lib/posts"
 
@@ -45,6 +47,26 @@ export function Cover({ src }: { src: string | null }) {
     <div
       aria-hidden="true"
       className="aspect-video w-full rounded-lg border border-line bg-surface"
+    />
+  )
+}
+
+export function NoPosts({ canWrite }: { canWrite: boolean }) {
+  return (
+    <EmptyState
+      icon={News01Icon}
+      title="Nenhum post ainda"
+      subtitle="Os posts publicados aparecem aqui."
+      action={
+        canWrite ? (
+          <Link
+            to="/admin/new"
+            className="press rounded-full bg-fg px-4 py-2 text-sm font-[510] text-bg"
+          >
+            Novo post
+          </Link>
+        ) : null
+      }
     />
   )
 }

@@ -118,6 +118,59 @@ test("shows the progress bar while a route loads", async ({ page }) => {
   await expect(bar).not.toBeAttached()
 })
 
+test.describe("empty state", () => {
+  const empty = (page: Page) =>
+    page.locator("main").getByRole("heading", { name: "Nenhum post ainda" })
+
+  test("shows it to visitors without an action", async ({ page }) => {
+    await setMock({ users: [user], tables: { posts: [] } })
+    await open(page, "/")
+    await expect(empty(page)).toBeVisible()
+    await expect(
+      page.locator("main").getByText("Os posts publicados aparecem aqui."),
+    ).toBeVisible()
+    await expect(
+      page.locator("main").getByRole("link", { name: "Novo post" }),
+    ).toHaveCount(0)
+  })
+
+  test("links a logged in user to a new post", async ({ page }) => {
+    await setMock({
+      users: [user],
+      tables: { posts: [post("3", "Rascunho", "03", { published: "false" })] },
+    })
+    await login(page)
+    await open(page, "/")
+    await expect(empty(page)).toBeVisible()
+    await page.locator("main").getByRole("link", { name: "Novo post" }).click()
+    await expect(page).toHaveURL(/\/admin\/new$/)
+  })
+
+  test("shows it in /admin without posts", async ({ page }) => {
+    await setMock({ users: [user], tables: { posts: [] } })
+    await login(page)
+    await expect(empty(page)).toBeVisible()
+    await expect(
+      page.locator("main").getByRole("link", { name: "Novo post" }),
+    ).toBeVisible()
+  })
+
+  test("hides it when there are posts", async ({ page }) => {
+    await open(page, "/")
+    await expect(page.getByRole("link", { name: "Segundo" })).toBeVisible()
+    await expect(empty(page)).toHaveCount(0)
+  })
+
+  test("hides it on a load error", async ({ page }) => {
+    await setMock({ fail: "BOOM" })
+    await open(page, "/")
+    await expect(page.locator("main").getByRole("alert")).toHaveText(
+      "Erro ao carregar: BOOM",
+    )
+    await expect(empty(page)).toHaveCount(0)
+  })
+})
+
 test("hides a draft from visitors", async ({ page }) => {
   await open(page, "/posts/post-3")
   await expect(

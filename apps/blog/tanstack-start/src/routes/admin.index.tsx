@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { Pagination } from "@/components/pagination"
-import { PostList } from "@/components/post-list"
+import { NoPosts, PostList } from "@/components/post-list"
 import { deletePost, listMine, parsePage } from "@/lib/posts"
 
 export const Route = createFileRoute("/admin/")({
@@ -30,36 +30,42 @@ function Admin() {
           {error ? `Erro ao carregar: ${error}` : failed}
         </p>
       ) : null}
-      <PostList
-        posts={posts}
-        actions={(post) => (
-          <div className="flex gap-1.5 text-xs font-[510]">
-            <Link
-              to="/admin/$postId/edit"
-              params={{ postId: post.id }}
-              className="press rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 backdrop-blur-md hover:bg-bg"
-            >
-              Editar
-            </Link>
-            <button
-              type="button"
-              className="press rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 text-red-400 backdrop-blur-md hover:bg-bg"
-              onClick={async () => {
-                if (!window.confirm(`Excluir "${post.title}"?`)) return
-                setFailed(null)
-                try {
-                  await deletePost({ data: post.id })
-                  await router.invalidate()
-                } catch (err) {
-                  setFailed((err as Error).message)
-                }
-              }}
-            >
-              Excluir
-            </button>
-          </div>
-        )}
-      />
+      {posts.length === 0 ? (
+        error ? null : (
+          <NoPosts canWrite />
+        )
+      ) : (
+        <PostList
+          posts={posts}
+          actions={(post) => (
+            <div className="flex gap-1.5 text-xs font-[510]">
+              <Link
+                to="/admin/$postId/edit"
+                params={{ postId: post.id }}
+                className="press rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 backdrop-blur-md hover:bg-bg"
+              >
+                Editar
+              </Link>
+              <button
+                type="button"
+                className="press rounded-full border border-white/10 bg-bg/70 px-3 py-1.5 text-red-400 backdrop-blur-md hover:bg-bg"
+                onClick={async () => {
+                  if (!window.confirm(`Excluir "${post.title}"?`)) return
+                  setFailed(null)
+                  try {
+                    await deletePost({ data: post.id })
+                    await router.invalidate()
+                  } catch (err) {
+                    setFailed((err as Error).message)
+                  }
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+          )}
+        />
+      )}
       <Pagination page={page} pages={pages} />
     </main>
   )
