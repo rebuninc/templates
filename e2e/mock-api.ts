@@ -31,19 +31,72 @@ const posts = [
   },
 ]
 
-const home = {
+const entry = {
   id: "h1",
   publishedAt: "2026-11-01T12:00:00.000Z",
   updatedAt: "2026-11-01T12:00:00.000Z",
-  title: "Blog do Rebun",
-  subtitle: "Notas sobre o CMS",
+}
+
+// Each template reads the page named after it.
+const pages: Record<string, object> = {
+  blog: {
+    ...entry,
+    title: "Blog do Rebun",
+    subtitle: "Notas sobre o CMS",
+  },
+  waitlist: {
+    ...entry,
+    eyebrow: "Lista de espera aberta",
+    headline: "Algo novo vem aí",
+    description: "Deixe seu e-mail e avisamos no lançamento.",
+    // Far future so the countdown always shows; the readable date is stable.
+    launchAt: "2099-12-15T15:00:00.000Z",
+  },
+}
+
+// Pages set by POST /__mock/fail-next/:page answer the next read with a 500.
+const failNext = new Set<string>()
+
+// Fields set by POST /__mock/next/:page are merged into that page's next read only.
+const nextFields = new Map<string, object>()
+
+async function submitWaitlist(request: Request) {
+  const body = await request.json()
+  const email = String(body?.email ?? "")
+  if (email === "erro@exemplo.com")
+    return Response.json({ error: "INTERNAL_ERROR" }, { status: 500 })
+  if (!email || email !== email.trim())
+    return Response.json({ error: "VALIDATION_ERROR" }, { status: 400 })
+  return Response.json({ id: "w1" }, { status: 201 })
 }
 
 Bun.serve({
   port: Number(process.env.MOCK_PORT),
   fetch(request) {
     const url = new URL(request.url)
-    if (url.pathname === "/api/pages/home") return Response.json(home)
+    const pageId = url.pathname.match(/^\/api\/pages\/([^/]+)$/)?.[1]
+    const failId = url.pathname.match(/^\/__mock\/fail-next\/([^/]+)$/)?.[1]
+    if (failId && request.method === "POST") {
+      failNext.add(failId)
+      return new Response(null, { status: 204 })
+    }
+    const nextId = url.pathname.match(/^\/__mock\/next\/([^/]+)$/)?.[1]
+    if (nextId && request.method === "POST")
+      return request.json().then((fields) => {
+        nextFields.set(nextId, fields)
+        return new Response(null, { status: 204 })
+      })
+    if (pageId && failNext.delete(pageId))
+      return Response.json({ error: "INTERNAL_ERROR" }, { status: 500 })
+    if (pageId) {
+      const fields = nextFields.get(pageId)
+      nextFields.delete(pageId)
+      return Response.json(
+        pages[pageId] ? { ...pages[pageId], ...fields } : null,
+      )
+    }
+    if (url.pathname === "/api/forms/waitlist" && request.method === "POST")
+      return submitWaitlist(request)
     if (url.pathname === "/api/collections/post") {
       const slug = url.searchParams.get("slug")
       if (slug === "erro")

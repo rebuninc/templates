@@ -1,0 +1,10 @@
+- main:
+    - paragraph: Lista de espera aberta
+    - heading "Algo novo vem aí" [level=1]
+    - paragraph: Deixe seu e-mail e avisamos no lançamento.
+    - paragraph: Lançamento em 15 de dezembro
+    - textbox "E-mail":
+        - /placeholder: seu@email.com
+    - button "Entrar na lista"
+    - paragraph: Sem spam. Um e-mail no lançamento, e só.
+    - paragraph: Feito com Rebun

@@ -2,8 +2,7 @@ import { readdirSync } from "node:fs"
 
 import { defineConfig } from "@playwright/test"
 
-const MOCK_PORT = 3299
-const MOCK_URL = `http://localhost:${MOCK_PORT}`
+import { MOCK_PORT, MOCK_URL } from "./e2e/mock-url"
 
 // One project per apps/<template>/<framework>; they share the spec and the snapshots.
 const apps = readdirSync("apps").flatMap((template) =>
@@ -31,7 +30,7 @@ export default defineConfig({
     ...servers.map((s) => ({
       command: `cd apps/${s.template}/${s.framework} && bun run dev --port ${new URL(s.url).port} --strictPort`,
       url: s.url,
-      env: { REBUN_URL: MOCK_URL, REBUN_API_KEY: "e2e-only-not-a-real-key" },
+      env: { REBUN_URL: MOCK_URL, REBUN_API_KEY: `e2e-${s.template}` },
     })),
   ],
 })

@@ -20,7 +20,7 @@ export interface Home {
   subtitle: string | null
 }
 
-type Schema = { collections: { post: Post }; pages: { home: Home } }
+type Schema = { collections: { post: Post }; pages: { blog: Home } }
 
 export type Result<T> = { data: T; error: null } | { data: null; error: string }
 
@@ -45,7 +45,7 @@ export const getHome = () =>
   run(async () => {
     const client = cms()
     const [home, posts] = await Promise.all([
-      client.page("home").get(),
+      client.page("blog").get(),
       client.collection("post").list({ limit: 50 }),
     ])
     return { home, posts: posts.items }

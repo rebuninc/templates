@@ -9,6 +9,7 @@
     "fmt": "bun fmt",
     "typecheck": "bun --filter '*' typecheck",
     "dev:blog": "bun --filter blog-tanstack-start dev",
+    "dev:waitlist": "bun --filter waitlist-tanstack-start dev",
     "test:e2e": "playwright test",
     "prepare": "husky"
   },
