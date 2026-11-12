@@ -31,7 +31,7 @@ export default defineConfig({
     ...servers.map((s) => ({
       command: `cd apps/${s.template}/${s.framework} && bun run dev --port ${new URL(s.url).port} --strictPort`,
       url: s.url,
-      env: { REBUN_URL: MOCK_URL, REBUN_API_KEY: "e2e-only-not-a-real-key" },
+      env: { REBUN_URL: MOCK_URL, REBUN_API_KEY: `e2e-${s.template}` },
     })),
   ],
 })

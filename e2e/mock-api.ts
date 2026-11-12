@@ -31,19 +31,41 @@ const posts = [
   },
 ]
 
-const home = {
+const page = (title: string, subtitle: string) => ({
   id: "h1",
   publishedAt: "2026-11-01T12:00:00.000Z",
   updatedAt: "2026-11-01T12:00:00.000Z",
-  title: "Blog do Rebun",
-  subtitle: "Notas sobre o CMS",
+  title,
+  subtitle,
+})
+
+// The blog reads the home page and the waitlist its own waitlist page.
+const pages: Record<string, ReturnType<typeof page>> = {
+  home: page("Blog do Rebun", "Notas sobre o CMS"),
+  waitlist: page(
+    "Algo novo vem aí",
+    "Deixe seu e-mail e avisamos no lançamento.",
+  ),
+}
+
+async function submitWaitlist(request: Request) {
+  const body = await request.json()
+  const email = String(body?.email ?? "")
+  if (email === "erro@exemplo.com")
+    return Response.json({ error: "INTERNAL_ERROR" }, { status: 500 })
+  if (!email || email !== email.trim())
+    return Response.json({ error: "VALIDATION_ERROR" }, { status: 400 })
+  return Response.json({ id: "w1" }, { status: 201 })
 }
 
 Bun.serve({
   port: Number(process.env.MOCK_PORT),
   fetch(request) {
     const url = new URL(request.url)
-    if (url.pathname === "/api/pages/home") return Response.json(home)
+    const pageId = url.pathname.match(/^\/api\/pages\/([^/]+)$/)?.[1]
+    if (pageId) return Response.json(pages[pageId] ?? null)
+    if (url.pathname === "/api/forms/waitlist" && request.method === "POST")
+      return submitWaitlist(request)
     if (url.pathname === "/api/collections/post") {
       const slug = url.searchParams.get("slug")
       if (slug === "erro")

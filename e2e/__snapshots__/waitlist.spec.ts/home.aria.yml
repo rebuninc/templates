@@ -1,0 +1,6 @@
+- main:
+    - heading "Algo novo vem aí" [level=1]
+    - paragraph: Deixe seu e-mail e avisamos no lançamento.
+    - textbox "E-mail":
+        - /placeholder: seu@email.com
+    - button "Entrar na lista"
