@@ -1,6 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 
+import { EmptyState } from "../components/empty-state"
+import { Heading } from "../components/heading"
+import { PostList } from "../components/post-list"
 import { getHome } from "../lib/rebun"
 
 const loadHome = createServerFn().handler(() => getHome())
@@ -10,35 +13,28 @@ export const Route = createFileRoute("/")({
   component: Home,
 })
 
+const page = "mx-auto grid w-full max-w-7xl gap-14 px-5 py-16 md:px-10 md:py-20"
+
 function Home() {
   const { data, error } = Route.useLoaderData()
   if (error !== null)
     return (
-      <main>
-        <p role="alert">Erro ao carregar: {error}</p>
+      <main className={page}>
+        <p role="alert" className="animate-alert-in text-red-400">
+          Erro ao carregar: {error}
+        </p>
       </main>
     )
   return (
-    <main>
-      <h1>{data.home.title}</h1>
-      {data.home.subtitle && <p>{data.home.subtitle}</p>}
+    <main className={page}>
+      <Heading title={data.home.title ?? ""} subtitle={data.home.subtitle} />
       {data.posts.length === 0 ? (
-        <p>Nenhum post publicado.</p>
+        <EmptyState
+          title="Nenhum post publicado."
+          subtitle="Os posts publicados aparecem aqui."
+        />
       ) : (
-        <ul>
-          {data.posts.map((post) => (
-            <li key={post.id}>
-              <article>
-                <h2>
-                  <Link to="/posts/$slug" params={{ slug: post.slug ?? "" }}>
-                    {post.title}
-                  </Link>
-                </h2>
-                {post.excerpt && <p>{post.excerpt}</p>}
-              </article>
-            </li>
-          ))}
-        </ul>
+        <PostList posts={data.posts} />
       )}
     </main>
   )

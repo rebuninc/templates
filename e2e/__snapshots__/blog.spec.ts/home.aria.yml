@@ -8,9 +8,13 @@
                     - link "Primeiro post":
                         - /url: /posts/primeiro-post
                 - paragraph: Resumo do primeiro post
+                - paragraph:
+                    - time: 01/11/2026
         - listitem:
             - article:
                 - heading "Segundo post" [level=2]:
                     - link "Segundo post":
                         - /url: /posts/segundo-post
                 - paragraph: Resumo do segundo post
+                - paragraph:
+                    - time: 02/11/2026

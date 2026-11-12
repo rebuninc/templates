@@ -1,8 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
-// react-markdown skips raw HTML, so CMS content can't inject markup.
-import Markdown from "react-markdown"
+import { motion } from "motion/react"
 
+import { Markdown } from "../../components/markdown"
+import { formatDate, postDate } from "../../components/post-list"
+import { enter, spring, useEnterFrom } from "../../lib/motion"
 import { getPost } from "../../lib/rebun"
 
 const loadPost = createServerFn()
@@ -14,34 +18,67 @@ export const Route = createFileRoute("/posts/$slug")({
   component: PostPage,
 })
 
+const sequence = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
+
 function PostPage() {
   const { data: post, error } = Route.useLoaderData()
-  if (error !== null)
-    return (
-      <main>
-        <p role="alert">Erro ao carregar: {error}</p>
-      </main>
-    )
-  if (!post)
-    return (
-      <main>
-        <p>Post não encontrado</p>
-      </main>
-    )
+  const from = useEnterFrom()
   return (
-    <main>
-      <article>
-        <h1>{post.title}</h1>
-        {post.cover && (
-          <img
-            src={post.cover.url}
-            alt={post.cover.alt ?? ""}
-            width={post.cover.width ?? undefined}
-            height={post.cover.height ?? undefined}
-          />
-        )}
-        <Markdown>{post.content ?? ""}</Markdown>
-      </article>
+    <main className="mx-auto grid w-full max-w-5xl gap-10 px-5 py-16 md:px-10 md:py-20">
+      <Link
+        to="/"
+        className="flex items-center gap-1 justify-self-center text-sm text-muted hover:text-fg"
+      >
+        <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+        Posts
+      </Link>
+      {error !== null ? (
+        <p role="alert" className="animate-alert-in text-center text-red-400">
+          Erro ao carregar: {error}
+        </p>
+      ) : !post ? (
+        <p className="text-center text-2xl font-[590]">Post não encontrado</p>
+      ) : (
+        <motion.article
+          initial={from}
+          animate="show"
+          variants={sequence}
+          className="grid gap-10"
+        >
+          <motion.h1
+            variants={enter}
+            transition={spring}
+            className="mx-auto max-w-4xl text-center text-4xl leading-[1.05] font-[590] tracking-[-0.022em] text-balance md:text-5xl"
+          >
+            {post.title}
+          </motion.h1>
+          {post.cover && (
+            <motion.img
+              variants={enter}
+              transition={spring}
+              src={post.cover.url}
+              alt={post.cover.alt ?? ""}
+              width={post.cover.width ?? undefined}
+              height={post.cover.height ?? undefined}
+              className="aspect-video w-full rounded-lg border border-line object-cover"
+            />
+          )}
+          <motion.p
+            variants={enter}
+            transition={spring}
+            className="text-center text-muted"
+          >
+            <time dateTime={postDate(post)}>{formatDate(postDate(post))}</time>
+          </motion.p>
+          <motion.div
+            variants={enter}
+            transition={spring}
+            className="mx-auto grid w-full max-w-156 gap-5 text-[17px] leading-[1.6] text-body"
+          >
+            <Markdown source={post.content ?? ""} />
+          </motion.div>
+        </motion.article>
+      )}
     </main>
   )
 }

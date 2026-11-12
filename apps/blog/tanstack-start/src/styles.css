@@ -1,21 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Urbanist", -apple-system, system-ui, "Segoe UI", sans-serif;
+  --color-bg: #08090a;
+  --color-surface: #0f1011;
+  --color-line: #23252a;
+  --color-fg: #f7f8f8;
+  --color-muted: #8a8f98;
+  --color-body: #d0d6e0;
+  --color-island: #000;
+}
+
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
-  line-height: 1.6;
+  color-scheme: dark;
 }
-body {
-  max-width: 42rem;
-  margin: 0 auto;
-  padding: 2rem 1rem;
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #fafafa;
+  --color-surface: #f5f5f6;
+  --color-line: #e4e5e7;
+  --color-fg: #08090a;
+  --color-muted: #6b6f76;
+  --color-body: #3c4149;
+  --color-island: #fff;
 }
-a {
-  color: inherit;
+
+/* The theme toggle reveals the new theme with a clip-path circle set from JS. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
-ul {
-  list-style: none;
-  padding: 0;
+
+@keyframes silk-arrive {
+  from {
+    transform: scale(1.16);
+  }
 }
-img {
-  max-width: 100%;
-  height: auto;
+
+@keyframes progress-primary {
+  0% {
+    left: -35%;
+    right: 100%;
+  }
+  60%,
+  100% {
+    left: 100%;
+    right: -90%;
+  }
+}
+
+@keyframes progress-secondary {
+  0% {
+    left: -200%;
+    right: 100%;
+  }
+  60%,
+  100% {
+    left: 107%;
+    right: -8%;
+  }
+}
+
+.animate-progress-primary {
+  animation: progress-primary 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+}
+
+.animate-progress-secondary {
+  animation: progress-secondary 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) 1.15s infinite;
+}
+
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.animate-alert-in {
+  animation: alert-in 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  @media (prefers-reduced-motion: reduce) {
+    animation-name: fade-in;
+  }
+}
+
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility island {
+  width: min(100% - 1.5rem, 80rem);
+  margin-inline: auto;
+  border: 1px solid var(--color-line);
+  background: var(--color-island);
+}
+
+@utility press {
+  transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  @media (prefers-reduced-motion: no-preference) {
+    &:active:not(:disabled) {
+      scale: 0.97;
+    }
+  }
 }
