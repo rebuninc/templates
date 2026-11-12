@@ -1,118 +1,222 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Urbanist", -apple-system, system-ui, "Segoe UI", sans-serif;
-  --color-bg: #08090a;
-  --color-surface: #0f1011;
-  --color-line: #23252a;
-  --color-fg: #f7f8f8;
-  --color-muted: #8a8f98;
-  --color-body: #d0d6e0;
-  --color-island: #000;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --color-void: #0b0b0c;
+  --color-panel: #141416;
+  --color-line: #2a2a2e;
+  --color-light: #f4f4f5;
+  --color-soft: #a0a0a8;
+  --color-faint: #6b6b73;
+  --color-accent: #5088f4;
+  --color-danger: #ff6b5b;
 }
 
 :root {
   color-scheme: dark;
 }
 
-[data-theme="light"] {
-  color-scheme: light;
-  --color-bg: #fafafa;
-  --color-surface: #f5f5f6;
-  --color-line: #e4e5e7;
-  --color-fg: #08090a;
-  --color-muted: #6b6f76;
-  --color-body: #3c4149;
-  --color-island: #fff;
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-void);
+  }
 }
 
-/* The theme toggle reveals the new theme with a clip-path circle set from JS. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+/* Entrance from the Rebun site hero (core inicio-cover): same keyframes, easing and delays. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
-@keyframes silk-arrive {
+@keyframes line-up {
+  from {
+    transform: translateY(135%);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes tick {
+  from {
+    transform: translateY(-70%);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes ping-soft {
+  to {
+    opacity: 0;
+    scale: 2.4;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+}
+
+@keyframes ping-once {
+  to {
+    opacity: 0;
+    scale: 2.2;
+  }
+}
+
+/* Each dot flies out along its own angle (--a) to its distance (--d), then fades. */
+@keyframes burst {
+  0% {
+    transform: rotate(var(--a)) translateX(0) scale(1);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateX(var(--d)) scale(0.4);
+  }
+}
+
+@keyframes arrive {
   from {
     transform: scale(1.16);
   }
 }
 
-@keyframes progress-primary {
-  0% {
-    left: -35%;
-    right: 100%;
+@media (prefers-reduced-motion: no-preference) {
+  .animate-rise-in {
+    animation: rise-in 500ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
-  60%,
-  100% {
-    left: 100%;
-    right: -90%;
+
+  /* Each word slides up out of its own clipped box; --i sets the order. */
+  .animate-line-up {
+    animation: line-up 1.15s cubic-bezier(0.16, 1, 0.3, 1)
+      calc(var(--i, 0) * 0.11s + 0.2s) backwards;
   }
-}
 
-@keyframes progress-secondary {
-  0% {
-    left: -200%;
-    right: 100%;
+  /* Needs pathLength={1}; reduced motion just shows the finished stroke. */
+  .animate-draw {
+    stroke-dasharray: 1;
+    animation: draw 700ms cubic-bezier(0.65, 0, 0.35, 1) backwards;
   }
-  60%,
-  100% {
-    left: 107%;
-    right: -8%;
+
+  .animate-tick {
+    animation: tick 420ms cubic-bezier(0.16, 1, 0.3, 1);
   }
-}
 
-.animate-progress-primary {
-  animation: progress-primary 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
-}
-
-.animate-progress-secondary {
-  animation: progress-secondary 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) 1.15s infinite;
-}
-
-@keyframes alert-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
+  /* Eyebrow dot: blinks while a ring pulses out of it, in the same 1.6s beat. */
+  .animate-blink {
+    animation: blink 1.6s ease-in-out infinite;
   }
-}
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
+  .animate-ping-soft {
+    animation: ping-soft 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
-}
 
-.animate-alert-in {
-  animation: alert-in 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  @media (prefers-reduced-motion: reduce) {
-    animation-name: fade-in;
+  .animate-pop {
+    animation: pop 500ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  }
+
+  .animate-ping-once {
+    animation: ping-once 900ms cubic-bezier(0, 0, 0.2, 1) 0.15s both;
+  }
+
+  .animate-burst {
+    animation: burst 1100ms cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  }
+
+  .animate-arrive {
+    animation: arrive 7s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
-@layer base {
-  button:not(:disabled) {
-    cursor: pointer;
-  }
+/* Opening curtain from the Rebun site (core landing-fx): a hole in an accent-colored screen grows to reveal the page. */
+.curtain {
+  display: none;
 }
 
-@utility island {
-  width: min(100% - 1.5rem, 80rem);
-  margin-inline: auto;
-  border: 1px solid var(--color-line);
-  background: var(--color-island);
-}
-
-@utility press {
-  transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1);
-  @media (prefers-reduced-motion: no-preference) {
-    &:active:not(:disabled) {
-      scale: 0.97;
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes curtain-hole {
+    to {
+      transform: scale(45);
     }
   }
+
+  @keyframes curtain-plug {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes curtain-end {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  .curtain {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    overflow: hidden;
+    pointer-events: none;
+    animation: curtain-end 0s linear 1.35s forwards;
+  }
+
+  /* Scaling a small hole stays on the compositor; the hard stop keeps the edge flat, not a fade. */
+  .curtain::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 150vmax;
+    margin: -75vmax 0 0 -75vmax;
+    background: radial-gradient(
+      circle at center,
+      transparent 1.6vmax,
+      var(--color-accent) calc(1.6vmax + 0.5px)
+    );
+    animation: curtain-hole 1.2s cubic-bezier(0.45, 0, 0.25, 1) 0.15s forwards;
+  }
+
+  /* Covers the hole's starting size so the screen begins fully covered. */
+  .curtain::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6vmax;
+    height: 6vmax;
+    margin: -3vmax 0 0 -3vmax;
+    border-radius: 50%;
+    background: var(--color-accent);
+    animation: curtain-plug 0.25s linear 0.15s forwards;
+  }
 }
 
-body:has([data-status-page]) :is(header, footer, [data-silk]) {
-  display: none;
+@media (prefers-reduced-motion: reduce) {
+  .animate-burst,
+  .animate-ping-once {
+    display: none;
+  }
 }

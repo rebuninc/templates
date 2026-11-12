@@ -37,11 +37,8 @@
     "apps/waitlist/tanstack-start": {
       "name": "waitlist-tanstack-start",
       "dependencies": {
-        "@hugeicons/core-free-icons": "4.4.0",
-        "@hugeicons/react": "1.1.10",
         "@tanstack/react-router": "1.170.46",
         "@tanstack/react-start": "1.169.5",
-        "motion": "14.9.1",
         "react": "19.3.1",
         "react-dom": "19.3.1",
         "rebun-cms": "0.0.2",

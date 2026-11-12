@@ -5,8 +5,10 @@ export interface Home {
   id: string
   publishedAt: string | null
   updatedAt: string
-  title: string | null
-  subtitle: string | null
+  eyebrow: string | null
+  headline: string | null
+  description: string | null
+  launchAt: string | null
 }
 
 export interface WaitlistForm {
