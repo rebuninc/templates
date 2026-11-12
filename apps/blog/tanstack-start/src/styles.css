@@ -112,3 +112,7 @@
     }
   }
 }
+
+body:has([data-status-page]) :is(header, footer, [data-silk]) {
+  display: none;
+}

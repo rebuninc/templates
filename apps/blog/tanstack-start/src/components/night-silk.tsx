@@ -119,7 +119,7 @@ export function NightSilk({ className = "" }: { className?: string }) {
   }, [])
 
   return (
-    <div aria-hidden="true" className={`bg-bg ${className}`}>
+    <div aria-hidden="true" data-silk className={`bg-bg ${className}`}>
       <div className="absolute -inset-[5%] animate-[silk-arrive_7s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:animate-none">
         <canvas
           ref={canvasRef}

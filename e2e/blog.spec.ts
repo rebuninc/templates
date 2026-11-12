@@ -28,7 +28,36 @@ test("shows a post", async ({ page }) => {
 
 test("post not found", async ({ page }) => {
   await page.goto("/posts/nao-existe")
-  await expect(page.getByText("Post não encontrado")).toBeVisible()
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Post não encontrado",
+  )
+  await expect(page.getByText("Erro 404 · NOT_FOUND")).toBeVisible()
+})
+
+test("shows 404 page", async ({ page }) => {
+  await page.goto("/nao-existe")
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Página não encontrada",
+  )
+  await expect(page.locator("header")).toBeHidden()
+  await expect(page.locator("footer")).toBeHidden()
+  await page.getByRole("link", { name: "Início" }).click()
+  await expect(page).toHaveURL("/")
+})
+
+test("shows 500 page", async ({ page }) => {
+  await page.goto("/posts/quebra")
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Algo deu errado",
+  )
+  await expect(page.getByText("Erro 500 · INTERNAL_ERROR")).toBeVisible()
+  await expect(page.getByText(/destructure|null/i)).toHaveCount(0)
+  await expect(
+    page.getByRole("button", { name: "Tentar novamente" }),
+  ).toBeVisible()
+  await expect(page.getByRole("link", { name: "Início" })).toBeVisible()
+  await expect(page.locator("header")).toBeHidden()
+  await expect(page.locator("footer")).toBeHidden()
 })
 
 test("shows api error", async ({ page }) => {

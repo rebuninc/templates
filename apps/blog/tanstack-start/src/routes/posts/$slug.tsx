@@ -1,11 +1,12 @@
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, notFound } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { motion } from "motion/react"
 
 import { Markdown } from "../../components/markdown"
 import { formatDate, postDate } from "../../components/post-list"
+import { NotFound } from "../../components/status-page"
 import { enter, spring, useEnterFrom } from "../../lib/motion"
 import { getPost } from "../../lib/rebun"
 
@@ -14,8 +15,13 @@ const loadPost = createServerFn()
   .handler(({ data }) => getPost(data))
 
 export const Route = createFileRoute("/posts/$slug")({
-  loader: ({ params }) => loadPost({ data: params.slug }),
+  loader: async ({ params }) => {
+    const result = await loadPost({ data: params.slug })
+    if (result.error === null && !result.data) throw notFound()
+    return result
+  },
   component: PostPage,
+  notFoundComponent: () => <NotFound title="Post não encontrado" />,
 })
 
 const sequence = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
@@ -36,9 +42,7 @@ function PostPage() {
         <p role="alert" className="animate-alert-in text-center text-red-400">
           Erro ao carregar: {error}
         </p>
-      ) : !post ? (
-        <p className="text-center text-2xl font-[590]">Post não encontrado</p>
-      ) : (
+      ) : !post ? null : (
         <motion.article
           initial={from}
           animate="show"

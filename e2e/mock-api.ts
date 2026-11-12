@@ -48,6 +48,8 @@ Bun.serve({
       const slug = url.searchParams.get("slug")
       if (slug === "erro")
         return Response.json({ error: "INTERNAL_ERROR" }, { status: 500 })
+      // A 200 with no body breaks the app outside RebunError, for the 500 page.
+      if (slug === "quebra") return Response.json(null)
       const items = slug ? posts.filter((p) => p.slug === slug) : posts
       return Response.json({ items, page: 1, limit: 50, total: items.length })
     }
