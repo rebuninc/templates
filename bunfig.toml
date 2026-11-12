@@ -1,0 +1,7 @@
+[install]
+exact = true
+
+[fmt]
+semi = false
+sortImports = true
+ignorePatterns = ["**/routeTree.gen.ts", "**/*.css", "**/*.md"]

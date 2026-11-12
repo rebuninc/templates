@@ -1,0 +1,10 @@
+- main:
+    - link "Posts":
+        - /url: /
+    - article:
+        - heading "Primeiro post" [level=1]
+        - img "Capa do primeiro post"
+        - paragraph:
+            - time: 01/11/2026
+        - heading "Introdução" [level=2]
+        - paragraph: Texto do primeiro post.
