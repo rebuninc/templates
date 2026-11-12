@@ -1,0 +1,16 @@
+- main:
+    - heading "Blog do Rebun" [level=1]
+    - paragraph: Notas sobre o CMS
+    - list:
+        - listitem:
+            - article:
+                - heading "Primeiro post" [level=2]:
+                    - link "Primeiro post":
+                        - /url: /posts/primeiro-post
+                - paragraph: Resumo do primeiro post
+        - listitem:
+            - article:
+                - heading "Segundo post" [level=2]:
+                    - link "Segundo post":
+                        - /url: /posts/segundo-post
+                - paragraph: Resumo do segundo post

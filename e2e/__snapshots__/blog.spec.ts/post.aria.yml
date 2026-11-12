@@ -1,0 +1,6 @@
+- main:
+    - article:
+        - heading "Primeiro post" [level=1]
+        - img "Capa do primeiro post"
+        - heading "Introdução" [level=2]
+        - paragraph: Texto do primeiro post.
