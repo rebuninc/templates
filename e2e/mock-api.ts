@@ -50,7 +50,7 @@ const pages: Record<string, object> = {
     headline: "Algo novo vem aí",
     description: "Deixe seu e-mail e avisamos no lançamento.",
     // Far future so the countdown always shows; the readable date is stable.
-    launchAt: "2099-12-15T15:00:00.000Z",
+    "launch-at": "2099-12-15T15:00:00.000Z",
   },
 }
 

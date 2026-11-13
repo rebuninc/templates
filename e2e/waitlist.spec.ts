@@ -79,7 +79,7 @@ test("shows countdown", async ({ page }) => {
 test("hides countdown after launch", async ({ page, request }) => {
   for (const launchAt of ["2000-01-01T00:00:00.000Z", null]) {
     const armed = await request.post(`${MOCK_URL}/__mock/next/waitlist`, {
-      data: { launchAt },
+      data: { "launch-at": launchAt },
     })
     expect(armed.ok()).toBe(true)
     await page.goto("/")

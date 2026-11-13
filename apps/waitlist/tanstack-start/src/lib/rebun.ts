@@ -8,7 +8,7 @@ export interface Home {
   eyebrow: string | null
   headline: string | null
   description: string | null
-  launchAt: string | null
+  "launch-at": string | null
 }
 
 export interface WaitlistForm {

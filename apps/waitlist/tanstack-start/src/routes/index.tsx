@@ -121,9 +121,9 @@ function Home() {
               {home.description}
             </p>
           )}
-          {home.launchAt && (
+          {home["launch-at"] && (
             <div style={delay(0.7)} className="animate-rise-in mt-10">
-              <Countdown to={home.launchAt} />
+              <Countdown to={home["launch-at"]} />
             </div>
           )}
           <div
